@@ -44,11 +44,16 @@ task compileJNI {
     dependsOn compileJava
 
     doLast {
-        delete fileTree('build/natives') {
-            exclude 'lib/*'
-        }
         exec {
-            commandLine 'sh', '-c', 'mkdir -p build/natives && cd build/natives && cmake ../.. && make'
+            commandLine 'scripts/build-native.sh'
+        }
+        def os = System.getProperty("os.name").toLowerCase()
+        def isLinux = os.contains("linux")
+        if (!isLinux) {
+            /* Run VM using Vagrant to build .so file */
+            exec {
+                commandLine 'scripts/vagrant-build.sh'
+            }
         }
     }
 }

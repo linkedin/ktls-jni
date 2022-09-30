@@ -1,2 +1,2 @@
-add_library(ktls-helper SHARED "")
-target_sources(ktls-helper PRIVATE KernelTLSNativeHelper.cpp)
+add_library(ktls-jni SHARED "")
+target_sources(ktls-jni PRIVATE KernelTLSNativeHelper.cpp)

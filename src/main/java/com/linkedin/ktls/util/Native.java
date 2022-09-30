@@ -9,7 +9,7 @@ import java.lang.UnsatisfiedLinkError;
 public enum Native {
   ;
 
-  private static final String libnameShort = "ktls-helper";
+  private static final String libnameShort = "ktls-jni";
   private static final String libname = "lib" + libnameShort;
   private static final String errorMsg = "Unsupported OS/arch, cannot find " +
       resourceName() + " or load " + libnameShort + " from system libraries. Please " +
