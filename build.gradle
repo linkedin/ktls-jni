@@ -40,19 +40,19 @@ compileJava {
     options.compilerArgs += ["-h", file("src/main/include/jni_generated")]
 }
 
+def os = System.getProperty("os.name").toLowerCase()
+def isLinux = os.contains("linux")
+
 task compileJNI {
     dependsOn compileJava
-
     doLast {
         exec {
             commandLine 'scripts/build-native.sh'
         }
-        def os = System.getProperty("os.name").toLowerCase()
-        def isLinux = os.contains("linux")
         if (!isLinux) {
             /* Run VM using Vagrant to build .so file */
             exec {
-                commandLine 'scripts/vagrant-build.sh'
+                commandLine 'scripts/vagrant-build-native.sh'
             }
         }
     }
@@ -71,6 +71,14 @@ processResources {
 tasks.withType(Test) {
     systemProperty "java.library.path", "build/natives/lib"
     testLogging.showStandardStreams = true
+}
+
+task testOnVagrant {
+    if (!isLinux) {
+        exec {
+            commandLine 'scripts/vagrant-test.sh'
+        }
+    }
 }
 
 publishing {

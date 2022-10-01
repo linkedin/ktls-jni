@@ -2,7 +2,7 @@
 
 #include <cstring>
 #include <cstdlib>
-#include <string>
+#include <vector>
 
 #ifdef __linux__
 #  include <linux/version.h>
@@ -18,11 +18,9 @@
 # define NO_KTLS
 #endif
 
-#define UNSUPPORTED_OS 6001
-#define UNSUPPORTED_CIPHER 6002
-#define UNSUPPORTED_OPERATION 6003
-#define UNABLE_TO_SET_TLS_MODE 6004
-#define UNABLE_TO_SET_TLS_PARAMS 6005
+const char* AES_GCM_128_CIPHER_NAME = "AES_GCM_128";
+const char* AES_GCM_256_CIPHER_NAME = "AES_GCM_256";
+const char* CHACHA20_POLY1305_CIPHER_NAME = "CHACHA20_POLY1305";
 
 JNIEXPORT jint JNICALL Java_com_linkedin_ktls_KernelTLSNativeHelper_add(JNIEnv *env, jobject self, jint a, jint b) {
     return a + b;
@@ -36,11 +34,11 @@ int startKernelTls(jint socketFd) {
 int enableTlsWithCryptoInfo(int socketFd, bool sendingMode, void* crypto_info, unsigned int crypto_info_size) {
     int ret_code = startKernelTls(socketFd);
     if (ret_code != 0) {
-        return UNABLE_TO_SET_TLS_MODE;
+        return com_linkedin_ktls_KernelTLSNativeHelper_UNABLE_TO_SET_TLS_MODE;
     }
     ret_code = setsockopt(socketFd, SOL_TLS, sendingMode ? TLS_TX : TLS_RX, crypto_info, crypto_info_size);
     if (ret_code != 0) {
-        return UNABLE_TO_SET_TLS_PARAMS;
+        return com_linkedin_ktls_KernelTLSNativeHelper_UNABLE_TO_SET_TLS_PARAMS;
     }
     return 0;
 }
@@ -59,7 +57,7 @@ JNIEXPORT jint JNICALL Java_com_linkedin_ktls_KernelTLSNativeHelper_enableKernel
     JNIEnv *env, jobject self, jint socketFd, jint versionCode,
     jbyteArray iv, jbyteArray key, jbyteArray salt, jbyteArray rec_seq) {
 #ifdef NO_KTLS
-    return UNSUPPORTED_OS;
+    return com_linkedin_ktls_KernelTLSNativeHelper_UNSUPPORTED_OPERATING_SYSTEM;
 #else
     struct tls12_crypto_info_aes_gcm_128 crypto_info;
     crypto_info.info.version = versionCode;
@@ -76,7 +74,7 @@ JNIEXPORT jint JNICALL Java_com_linkedin_ktls_KernelTLSNativeHelper_enableKernel
     JNIEnv *env, jobject self, jint socketFd, jint versionCode,
     jbyteArray iv, jbyteArray key, jbyteArray salt, jbyteArray rec_seq) {
 #ifdef NO_KTLS
-    return UNSUPPORTED_OS;
+    return com_linkedin_ktls_KernelTLSNativeHelper_UNSUPPORTED_OPERATING_SYSTEM;
 #else
     struct tls12_crypto_info_aes_gcm_256 crypto_info;
     crypto_info.info.version = versionCode;
@@ -93,9 +91,7 @@ JNIEXPORT jint JNICALL Java_com_linkedin_ktls_KernelTLSNativeHelper_enableKernel
     JNIEnv *env, jobject self, jint socketFd, jint versionCode,
     jbyteArray iv, jbyteArray key, jbyteArray salt, jbyteArray rec_seq) {
 #ifdef NO_KTLS
-    return UNSUPPORTED_OS;
-#elif !defined TLS_CIPHER_CHACHA20_POLY1305
-    return UNSUPPORTED_CIPHER;
+    return com_linkedin_ktls_KernelTLSNativeHelper_UNSUPPORTED_OPERATING_SYSTEM;
 #else
     struct tls12_crypto_info_chacha20_poly1305 crypto_info;
     crypto_info.info.version = versionCode;
@@ -108,7 +104,25 @@ JNIEXPORT jint JNICALL Java_com_linkedin_ktls_KernelTLSNativeHelper_enableKernel
 #endif
 }
 
-JNIEXPORT jint JNICALL Java_com_linkedin_ktls_KTLS_disableKernelTls(
-    JNIEnv *env, jobject self, jint socketFd) {
-    return UNSUPPORTED_OPERATION;
+JNIEXPORT jobjectArray JNICALL Java_com_linkedin_ktls_KernelTLSNativeHelper_getSupportedSymmetricCiphers
+    (JNIEnv *env, jobject self) {
+    jclass stringCls = env->FindClass("Ljava/lang/String;");
+# ifdef NO_KTLS
+    jobjectArray emptyArray = env->NewObjectArray(0, stringCls, NULL);
+    return emptyArray;
+# else
+    std::vector<jstring> supportedCiphers;
+
+    supportedCiphers.push_back(env->NewStringUTF(AES_GCM_128_CIPHER_NAME));
+    supportedCiphers.push_back(env->NewStringUTF(AES_GCM_256_CIPHER_NAME));
+# ifdef TLS_CIPHER_CHACHA20_POLY1305
+    supportedCiphers.push_back(env->NewStringUTF(CHACHA20_POLY1305_CIPHER_NAME));
+# endif
+    jobjectArray resultArray = env->NewObjectArray(supportedCiphers.size(), stringCls, NULL);
+    int index = 0;
+    for (jstring cipherStr : supportedCiphers) {
+        env->SetObjectArrayElement(resultArray, index++, cipherStr);
+    }
+    return resultArray;
+#endif
 }

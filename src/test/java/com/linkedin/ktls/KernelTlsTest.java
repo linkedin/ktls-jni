@@ -2,10 +2,14 @@ package com.linkedin.ktls;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
+import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
+import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLEngineResult;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIf;
@@ -38,17 +42,33 @@ public class KernelTlsTest extends KernelTLSTestBase {
     }
   }
 
+  private static boolean isLinux() {
+    return System.getProperty("os.name").toLowerCase(Locale.ROOT).startsWith("linux");
+  }
+
   private static boolean isLinuxAndOlderThan(final KernelVersion version) {
-    if (!System.getProperty("os.name").toLowerCase(Locale.ROOT).startsWith("linux")) {
+    if (!isLinux()) {
       return false;
     }
     final KernelVersion currentVersion = new KernelVersion(System.getProperty("os.version"));
     return currentVersion.compareTo(version) < 0;
   }
 
+  private static boolean isLinuxAndNotOlderThan(final KernelVersion version) {
+    if (!isLinux()) {
+      return false;
+    }
+    final KernelVersion currentVersion = new KernelVersion(System.getProperty("os.version"));
+    return currentVersion.compareTo(version) >= 0;
+  }
+
   @SuppressWarnings("unused") // Used by testKernelTlsSendFailsWithUnsupportedLinuxOS()
   private static boolean isUnsupportedLinuxVersion() {
     return isLinuxAndOlderThan(MIN_SUPPORTED_KERNEL_VERSION);
+  }
+
+  private static boolean isSupportedLinuxVersion() {
+    return isLinuxAndNotOlderThan(MIN_SUPPORTED_KERNEL_VERSION);
   }
 
   @SuppressWarnings("unused")
@@ -59,7 +79,7 @@ public class KernelTlsTest extends KernelTLSTestBase {
   @Test
   @EnabledOnOs({OS.LINUX})
   void testKernelTlsSendSucceeds() throws Exception {
-    setupTlsHandshake(ProtocolVersion.TLS_1_2.name, TLS_RSA_WITH_AES_128_GCM_SHA256.name);
+    setupTlsHandshake(ProtocolVersion.TLS_1_2.versionName, TLS_RSA_WITH_AES_128_GCM_SHA256.suiteName);
 
     KernelTls kernelTls = new KernelTls();
     kernelTls.enableKernelTlsForSend(serverSSLEngine, serverChannel);
@@ -97,8 +117,8 @@ public class KernelTlsTest extends KernelTLSTestBase {
 
   @Test
   @EnabledOnOs({OS.MAC})
-  void testKernelTlsSendFailsWithUnsupportedMacOS() throws Exception {
-    setupTlsHandshake(ProtocolVersion.TLS_1_2.name, TLS_RSA_WITH_AES_128_GCM_SHA256.name);
+  void testKernelTlsSendFailsOnMacOS() throws Exception {
+    setupTlsHandshake(ProtocolVersion.TLS_1_2.versionName, TLS_RSA_WITH_AES_128_GCM_SHA256.suiteName);
 
     KernelTls kernelTls = new KernelTls();
     assertThrows(KTLSEnableFailedException.class, () ->
@@ -108,7 +128,7 @@ public class KernelTlsTest extends KernelTLSTestBase {
   @Test
   @EnabledOnOs({OS.LINUX})
   void testKernelTlsSendFailsWithUnsupportedCipher() throws Exception {
-    setupTlsHandshake(ProtocolVersion.TLS_1_2.name, "TLS_RSA_WITH_AES_256_CBC_SHA256");
+    setupTlsHandshake(ProtocolVersion.TLS_1_2.versionName, "TLS_RSA_WITH_AES_256_CBC_SHA256");
 
     KernelTls kernelTls = new KernelTls();
     assertThrows(KTLSEnableFailedException.class, () ->
@@ -117,8 +137,8 @@ public class KernelTlsTest extends KernelTLSTestBase {
 
   @Test
   @EnabledIf("isUnsupportedLinuxVersion")
-  void testKernelTlsSendFailsWithUnsupportedLinuxOS() throws Exception {
-    setupTlsHandshake(ProtocolVersion.TLS_1_2.name, TLS_RSA_WITH_AES_128_GCM_SHA256.name);
+  void testKernelTlsSendFailsOnUnsupportedLinuxOS() throws Exception {
+    setupTlsHandshake(ProtocolVersion.TLS_1_2.versionName, TLS_RSA_WITH_AES_128_GCM_SHA256.suiteName);
 
     KernelTls kernelTls = new KernelTls();
     assertThrows(KTLSEnableFailedException.class, () ->
@@ -128,10 +148,26 @@ public class KernelTlsTest extends KernelTLSTestBase {
   @Test
   @EnabledIf("isLinuxVersionTooOldForChaCha20Poly1305")
   void testKernelTlsSendFailsWithUnsupportedCipherOnLinuxVersion() throws Exception {
-    setupTlsHandshake(ProtocolVersion.TLS_1_2.name, TLS_CHACHA20_POLY1305_SHA256.name);
+    setupTlsHandshake(ProtocolVersion.TLS_1_2.versionName, TLS_CHACHA20_POLY1305_SHA256.suiteName);
 
     KernelTls kernelTls = new KernelTls();
     assertThrows(KTLSEnableFailedException.class, () ->
         kernelTls.enableKernelTlsForSend(serverSSLEngine, serverChannel));
+  }
+
+  @Test
+  @EnabledOnOs({OS.MAC})
+  void testSupportedCipherSuitesIsEmptyOnUnsupportedOs() {
+    KernelTls kernelTls = new KernelTls();
+    assertTrue(kernelTls.supportedCipherSuites().isEmpty());
+  }
+
+  @Test
+  @EnabledIf("isSupportedLinuxVersion")
+  void testSupportedCipherSuitesIsNotEmpty() {
+    KernelTls kernelTls = new KernelTls();
+    final List<String> supportedCipherSuites = kernelTls.supportedCipherSuites();
+    assertFalse(supportedCipherSuites.isEmpty());
+    assertTrue(supportedCipherSuites.contains(TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256.suiteName));
   }
 }

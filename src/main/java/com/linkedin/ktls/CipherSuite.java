@@ -37,13 +37,14 @@ enum CipherSuite {
   TLS_AES_256_GCM_SHA384("TLS_AES_256_GCM_SHA384", 0x1302, AES_GCM_256, TLS_1_3),
   TLS_CHACHA20_POLY1305_SHA256("TLS_CHACHA20_POLY1305_SHA256", 0x1303, CHACHA20_POLY1305, TLS_1_3);
 
-  final String name;
+  final String suiteName;
   final int code;
   SymmetricCipher symmetricCipher;
   final List<ProtocolVersion> supportedVersions;
 
-  CipherSuite(final String name, final int code, SymmetricCipher symmetricCipher, final ProtocolVersion... supportedVersions) {
-    this.name = name;
+  CipherSuite(final String suiteName, final int code,
+      SymmetricCipher symmetricCipher, final ProtocolVersion... supportedVersions) {
+    this.suiteName = suiteName;
     this.code = code;
     this.symmetricCipher = symmetricCipher;
     this.supportedVersions = Arrays.asList(supportedVersions);

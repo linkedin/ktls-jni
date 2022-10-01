@@ -2,12 +2,10 @@ package com.linkedin.ktls;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.Random;
 import java.util.stream.Stream;
 import org.bouncycastle.util.encoders.Hex;
 import org.junit.jupiter.api.condition.EnabledForJreRange;
-import org.junit.jupiter.api.condition.EnabledOnJre;
 import org.junit.jupiter.api.condition.JRE;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.Arguments;
@@ -66,7 +64,7 @@ public class TlsParametersV2ExtractorTest extends KernelTLSTestBase {
 
   void validate_encrypted_record_then_decrypt_back(
       ProtocolVersion tlsProtocolVersion, CipherSuite cipherSuite, TlsCipher tlsCipher) throws Exception {
-    setupTlsHandshake(tlsProtocolVersion.name, cipherSuite.name);
+    setupTlsHandshake(tlsProtocolVersion.versionName, cipherSuite.suiteName);
 
     final TlsParametersExtractor extractor = new TlsParametersExtractor();
     final TlsParameters tlsParameters = extractor.extract(clientSSLEngine);

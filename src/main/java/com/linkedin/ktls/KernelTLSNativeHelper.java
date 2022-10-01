@@ -3,6 +3,11 @@ package com.linkedin.ktls;
 import com.linkedin.ktls.util.Native;
 import com.linkedin.ktls.util.ReflectionUtils;
 import java.nio.channels.SocketChannel;
+import java.util.Arrays;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 
 class KernelTLSNativeHelper {
@@ -54,11 +59,11 @@ class KernelTLSNativeHelper {
   private KTLSEnableFailedException buildExceptionForReturnCode(int retCode) {
     switch (retCode) {
       case UNSUPPORTED_OPERATING_SYSTEM:
-        return new KTLSEnableFailedException("Kernel TLS is not supported on this operating system");
+        return new KTLSEnableFailedException("ktls-jni was not built with support for this operating system");
       case UNSUPPORTED_CIPHER:
-        return new KTLSEnableFailedException("Kernel TLS is not supported for the specified cipher on this platform");
+        return new KTLSEnableFailedException("ktls-jni was not built with support for the specified cipher");
       case UNSUPPORTED_OPERATION:
-        return new KTLSEnableFailedException("This action is not yet supported.");
+        return new KTLSEnableFailedException("This action is not supported.");
       case UNABLE_TO_SET_TLS_MODE:
         return new KTLSEnableFailedException("Unable to set socket to TLS mode. "
             + "This may indicate that the \"tls\" kernel module is not enabled.");
@@ -78,5 +83,13 @@ class KernelTLSNativeHelper {
   private native int enableKernelTlsForSend_CHACHA20_POLY1305(
       int fd, int version_code, byte[] iv, byte[] key, byte[] salt, byte[] rec_seq);
 
-  native int disableKernelTls(int fd);
+  public List<String> getSupportedCipherSuites() {
+    final Set<String> supportedSymmetricCiphers = new HashSet<>(Arrays.asList(getSupportedSymmetricCiphers()));
+    return Arrays.stream(CipherSuite.values())
+        .filter(cs -> supportedSymmetricCiphers.contains(cs.symmetricCipher.cipherName))
+        .map(cs -> cs.suiteName)
+        .collect(Collectors.toList());
+  }
+
+  private native String[] getSupportedSymmetricCiphers();
 }

@@ -43,11 +43,11 @@ JNIEXPORT jint JNICALL Java_com_linkedin_ktls_KernelTLSNativeHelper_enableKernel
 
 /*
  * Class:     com_linkedin_ktls_KernelTLSNativeHelper
- * Method:    disableKernelTls
- * Signature: (I)I
+ * Method:    getSupportedSymmetricCiphers
+ * Signature: ()[Ljava/lang/String;
  */
-JNIEXPORT jint JNICALL Java_com_linkedin_ktls_KernelTLSNativeHelper_disableKernelTls
-  (JNIEnv *, jobject, jint);
+JNIEXPORT jobjectArray JNICALL Java_com_linkedin_ktls_KernelTLSNativeHelper_getSupportedSymmetricCiphers
+  (JNIEnv *, jobject);
 
 #ifdef __cplusplus
 }

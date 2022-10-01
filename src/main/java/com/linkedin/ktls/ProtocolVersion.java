@@ -6,11 +6,11 @@ import java.util.Arrays;
 enum ProtocolVersion {
   TLS_1_2("TLSv1.2", 0x0303), TLS_1_3("TLSv1.3", 0x0304);
 
-  final String name;
+  final String versionName;
   final int code;
 
-  ProtocolVersion(final String name, final int code) {
-    this.name = name;
+  ProtocolVersion(final String versionName, final int code) {
+    this.versionName = versionName;
     this.code = code;
   }
 

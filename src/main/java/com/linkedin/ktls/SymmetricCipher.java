@@ -5,9 +5,9 @@ enum SymmetricCipher {
   AES_GCM_256("AES_GCM_256"),
   CHACHA20_POLY1305("CHACHA20_POLY1305");
 
-  final String name;
+  final String cipherName;
 
-  SymmetricCipher(String name) {
-    this.name = name;
+  SymmetricCipher(String cipherName) {
+    this.cipherName = cipherName;
   }
 }
