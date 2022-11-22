@@ -15,6 +15,7 @@
 #    include <linux/tls.h>
 #  endif
 #else
+#    include <sys/socket.h>
 # define NO_KTLS
 #endif
 
@@ -126,3 +127,36 @@ JNIEXPORT jobjectArray JNICALL Java_com_linkedin_ktls_KernelTLSNativeHelper_getS
     return resultArray;
 #endif
 }
+
+JNIEXPORT jint JNICALL Java_com_linkedin_ktls_KernelTLSNativeHelper_sendControlMessage
+  (JNIEnv *env, jobject self, jint socketFd, jbyte recordType, jbyteArray data) {
+#ifdef NO_KTLS
+    return -1;
+#else
+    jbyte* dataArr = env->GetByteArrayElements(data, NULL);
+    jsize dataLen = env->GetArrayLength(data);
+
+    msghdr msg = {0};
+    // Record type is 1 byte
+    int cmsg_len = 1;
+    cmsghdr *cmsg;
+    char buf[CMSG_SPACE(cmsg_len)];
+    iovec msg_iov;   /* Vector of data to send/receive into.  */
+
+    msg.msg_control = buf;
+    msg.msg_controllen = sizeof(buf);
+    cmsg = CMSG_FIRSTHDR(&msg);
+    cmsg->cmsg_level = SOL_TLS;
+    cmsg->cmsg_type = TLS_SET_RECORD_TYPE;
+    cmsg->cmsg_len = CMSG_LEN(cmsg_len);
+    *CMSG_DATA(cmsg) = recordType;
+    msg.msg_controllen = cmsg->cmsg_len;
+
+    msg_iov.iov_base = dataArr;
+    msg_iov.iov_len = dataLen;
+    msg.msg_iov = &msg_iov;
+    msg.msg_iovlen = 1;
+
+    return sendmsg(socketFd, &msg, 0);
+#endif
+  }

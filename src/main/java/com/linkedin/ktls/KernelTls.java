@@ -27,6 +27,10 @@ public class KernelTls {
     kernelTLSNativeHelper.enableKernelTlsForSend(socketChannel, tlsParameters);
   }
 
+  public void closeNotify(SocketChannel socketChannel) {
+    kernelTLSNativeHelper.sendCloseNotify(socketChannel);
+  }
+
   public List<String> supportedCipherSuites() {
     return kernelTLSNativeHelper.getSupportedCipherSuites();
   }

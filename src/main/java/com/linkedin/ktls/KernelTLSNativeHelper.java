@@ -17,23 +17,32 @@ class KernelTLSNativeHelper {
   private static final int UNABLE_TO_SET_TLS_MODE = 6004;
   private static final int UNABLE_TO_SET_TLS_PARAMS = 6005;
 
+  private static final byte RECORD_TYPE_ALERT = 21;
+  private static final byte ALERT_LEVEL_WARNING = 1;
+  private static final byte ALERT_CLOSE_NOTIFY = 0;
+
   static {
     Native.load();
   }
 
-  int extractFd(SocketChannel socketChannel) throws KTLSEnableFailedException {
+  int extractFd(SocketChannel socketChannel) {
     try {
       final Object fileDescriptor =
           ReflectionUtils.getValueAtField("sun.nio.ch.SocketChannelImpl", "fd", socketChannel);
       return (int) ReflectionUtils.getValueAtField("java.io.FileDescriptor", "fd", fileDescriptor);
     } catch (Exception e) {
-      throw new KTLSEnableFailedException("Error attempting to extract file descriptor from socket", e);
+      throw new IllegalArgumentException(e);
     }
   }
 
   void enableKernelTlsForSend(SocketChannel socketChannel, TlsParameters tlsParameters)
       throws KTLSEnableFailedException {
-    final int fd = extractFd(socketChannel);
+    final int fd;
+    try {
+      fd = extractFd(socketChannel);
+    } catch (Exception e) {
+      throw new KTLSEnableFailedException("Error attempting to extract file descriptor from socket", e);
+    }
     final int retCode;
     switch (tlsParameters.symmetricCipher) {
       case AES_GCM_128:
@@ -92,4 +101,17 @@ class KernelTLSNativeHelper {
   }
 
   private native String[] getSupportedSymmetricCiphers();
+
+  public void sendCloseNotify(SocketChannel socketChannel) {
+    final int socketFd = extractFd(socketChannel);
+    final byte[] data = new byte[2];
+    data[0] = ALERT_LEVEL_WARNING;
+    data[1] = ALERT_CLOSE_NOTIFY;
+    int result = sendControlMessage(socketFd, RECORD_TYPE_ALERT, data);
+    if (result < 0) {
+      throw new RuntimeException("Failed to send close_notify alert");
+    }
+  }
+
+  private native int sendControlMessage(int socketFd, byte recordType, byte[] data);
 }

@@ -17,6 +17,12 @@ extern "C" {
 #define com_linkedin_ktls_KernelTLSNativeHelper_UNABLE_TO_SET_TLS_MODE 6004L
 #undef com_linkedin_ktls_KernelTLSNativeHelper_UNABLE_TO_SET_TLS_PARAMS
 #define com_linkedin_ktls_KernelTLSNativeHelper_UNABLE_TO_SET_TLS_PARAMS 6005L
+#undef com_linkedin_ktls_KernelTLSNativeHelper_RECORD_TYPE_ALERT
+#define com_linkedin_ktls_KernelTLSNativeHelper_RECORD_TYPE_ALERT 21L
+#undef com_linkedin_ktls_KernelTLSNativeHelper_ALERT_LEVEL_WARNING
+#define com_linkedin_ktls_KernelTLSNativeHelper_ALERT_LEVEL_WARNING 1L
+#undef com_linkedin_ktls_KernelTLSNativeHelper_ALERT_CLOSE_NOTIFY
+#define com_linkedin_ktls_KernelTLSNativeHelper_ALERT_CLOSE_NOTIFY 0L
 /*
  * Class:     com_linkedin_ktls_KernelTLSNativeHelper
  * Method:    enableKernelTlsForSend_AES_128_GCM
@@ -48,6 +54,14 @@ JNIEXPORT jint JNICALL Java_com_linkedin_ktls_KernelTLSNativeHelper_enableKernel
  */
 JNIEXPORT jobjectArray JNICALL Java_com_linkedin_ktls_KernelTLSNativeHelper_getSupportedSymmetricCiphers
   (JNIEnv *, jobject);
+
+/*
+ * Class:     com_linkedin_ktls_KernelTLSNativeHelper
+ * Method:    sendControlMessage
+ * Signature: (IB[B)I
+ */
+JNIEXPORT jint JNICALL Java_com_linkedin_ktls_KernelTLSNativeHelper_sendControlMessage
+  (JNIEnv *, jobject, jint, jbyte, jbyteArray);
 
 #ifdef __cplusplus
 }

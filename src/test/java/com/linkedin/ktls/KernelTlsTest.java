@@ -2,15 +2,13 @@ package com.linkedin.ktls;
 
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
-import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import javax.net.ssl.SSLContext;
-import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLEngineResult;
+import org.apache.commons.codec.binary.Hex;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.condition.EnabledIf;
 import org.junit.jupiter.api.condition.EnabledOnOs;
@@ -113,6 +111,21 @@ public class KernelTlsTest extends KernelTLSTestBase {
     clientAppInBuffer.get(clientAppInBytes);
 
     assertArrayEquals(serverPlainText, clientAppInBytes);
+
+    clientNetworkInBuffer.clear();
+    clientAppInBuffer.clear();
+
+    kernelTls.closeNotify(serverChannel);
+    clientChannel.read(clientNetworkInBuffer);
+
+    clientNetworkInBuffer.flip();
+
+    assertFalse(clientSSLEngine.isInboundDone());
+    clientSSLEngine.unwrap(clientNetworkInBuffer, clientAppInBuffer);
+    assertTrue(clientSSLEngine.isInboundDone());
+
+    serverChannel.close();
+    clientChannel.close();
   }
 
   @Test

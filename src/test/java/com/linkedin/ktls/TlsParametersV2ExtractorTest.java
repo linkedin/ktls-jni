@@ -50,19 +50,19 @@ public class TlsParametersV2ExtractorTest extends KernelTLSTestBase {
   @ParameterizedTest
   @MethodSource("validateEncryptedRecordArgProviderTls1_3")
   @EnabledForJreRange(min = JRE.JAVA_11)
-  void validate_encrypted_record_then_decrypt_back_tls1_3(
+  void validate_decrypted_record_tls1_3(
       ProtocolVersion tlsProtocolVersion, CipherSuite cipherSuite, TlsCipher tlsCipher) throws Exception {
-    validate_encrypted_record_then_decrypt_back(tlsProtocolVersion, cipherSuite, tlsCipher);
+    validate_decrypted_record(tlsProtocolVersion, cipherSuite, tlsCipher);
   }
 
   @ParameterizedTest
   @MethodSource("validateEncryptedRecordArgProviderTls1_2")
-  void validate_encrypted_record_then_decrypt_back_tls1_2(
+  void validate_decrypted_record_tls1_2(
       ProtocolVersion tlsProtocolVersion, CipherSuite cipherSuite, TlsCipher tlsCipher) throws Exception {
-    validate_encrypted_record_then_decrypt_back(tlsProtocolVersion, cipherSuite, tlsCipher);
+    validate_decrypted_record(tlsProtocolVersion, cipherSuite, tlsCipher);
   }
 
-  void validate_encrypted_record_then_decrypt_back(
+  void validate_decrypted_record(
       ProtocolVersion tlsProtocolVersion, CipherSuite cipherSuite, TlsCipher tlsCipher) throws Exception {
     setupTlsHandshake(tlsProtocolVersion.versionName, cipherSuite.suiteName);
 
