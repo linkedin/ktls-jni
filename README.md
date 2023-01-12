@@ -1,0 +1,17 @@
+# About the project
+This library provides a way for Java-based applications to take advantage of in-kernel TLS encryption and decryption available in modern Linux kernels.
+The project is structured as a JNI library and the corresponding C++ class that makes appropriate system calls to enable in-kernel TLS on a socket.
+
+# Build requirements
+Building the dynamically linked library (`.so` file) that makes the necessary system calls requires Kernel TLS to be supported on the system that is being used for the build. It requires the presence of some kernel header files that would only be present on a host running a sufficiently recent Linux distribution (with Kernel version >= 4.17).
+
+However, for ease of use and development, we wanted developers using older Linux hosts or MacOS to be able to build the library. To achieve this, we use Vagrant to download a Linux host virtual image, and run the build inside that virtual machine.
+
+Pre-requisites for the build are `vagrant` and `virtualbox`.
+
+# How to build
+In order to build the project, just run
+
+`./gradlew build`
+
+This should invoke Vagrant and build the JAR containing the Java classes as well as the `.so` file.

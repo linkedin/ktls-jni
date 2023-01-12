@@ -15,17 +15,13 @@
 #    include <linux/tls.h>
 #  endif
 #else
-#    include <sys/socket.h>
-# define NO_KTLS
+#  include <sys/socket.h>
+#  define NO_KTLS
 #endif
 
 const char* AES_GCM_128_CIPHER_NAME = "AES_GCM_128";
 const char* AES_GCM_256_CIPHER_NAME = "AES_GCM_256";
 const char* CHACHA20_POLY1305_CIPHER_NAME = "CHACHA20_POLY1305";
-
-JNIEXPORT jint JNICALL Java_com_linkedin_ktls_KernelTLSNativeHelper_add(JNIEnv *env, jobject self, jint a, jint b) {
-    return a + b;
-}
 
 #ifndef NO_KTLS
 int startKernelTls(jint socketFd) {
