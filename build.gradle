@@ -1,0 +1,97 @@
+plugins {
+    id 'idea'
+    id 'java-library'
+    id 'maven-publish'
+}
+
+group 'com.linkedin.ktls'
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(8)
+    }
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter-params:5.8.1'
+    testImplementation 'org.bouncycastle:bcpkix-jdk18on:1.71.1'
+    testImplementation 'commons-codec:commons-codec:1.15'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.7.0'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+sourceSets {
+    main {
+        resources {
+            srcDirs "src/main/resources", "build/natives/lib"
+        }
+    }
+}
+
+compileJava {
+    options.compilerArgs += ["-h", file("src/main/include/jni_generated")]
+}
+
+def os = System.getProperty("os.name").toLowerCase()
+def isLinux = os.contains("linux")
+
+task compileJNI {
+    dependsOn compileJava
+    doLast {
+        exec {
+            commandLine 'scripts/build-native.sh'
+        }
+        if (!isLinux) {
+            /* Run VM using Vagrant to build .so file */
+            exec {
+                commandLine 'scripts/vagrant-build-native.sh'
+            }
+        }
+    }
+}
+
+clean.doFirst {
+    delete fileTree('src/main/include/jni_generated') {
+        include '*.h'
+    }
+}
+
+processResources {
+    dependsOn compileJNI
+}
+
+tasks.withType(Test) {
+    systemProperty "java.library.path", "build/natives/lib"
+    testLogging.showStandardStreams = true
+}
+
+task testOnVagrant {
+    if (!isLinux) {
+        exec {
+            commandLine 'scripts/vagrant-test.sh'
+        }
+    }
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            version = '1.0.0-SNAPSHOT'
+            from components.java
+        }
+    }
+}
+
+publishToMavenLocal.dependsOn(assemble)
+
+task install {
+    dependsOn publishToMavenLocal
+}
