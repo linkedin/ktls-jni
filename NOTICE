@@ -5,6 +5,6 @@ Licensed under the BSD 2-Clause License (the "License").
 See LICENSE in the project root for license information.
 
 
-This product includes:
-
-* ktls-jni, the JNI wrapper for kernel TLS
+This product includes/uses modified source code from zstd-jni (https://github.com/luben/zstd-jni)
+Copyright (c) 2015-2023
+License: BSD
