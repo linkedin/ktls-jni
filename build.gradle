@@ -7,12 +7,13 @@ plugins {
 group 'com.linkedin.ktls'
 
 repositories {
+    mavenLocal()
     mavenCentral()
 }
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(8)
+        languageVersion = JavaLanguageVersion.of(11)
     }
 }
 
@@ -46,13 +47,17 @@ def isLinux = os.contains("linux")
 task compileJNI {
     dependsOn compileJava
     doLast {
-        exec {
-            commandLine 'scripts/build-native.sh'
-        }
-        if (!isLinux) {
-            /* Run VM using Vagrant to build .so file */
+        // Run the build-native.sh script if the "RUN_NATIVE_BUILD" flag is set
+        if (project.hasProperty('RUN_NATIVE_BUILD')) {
             exec {
-                commandLine 'scripts/vagrant-build-native.sh'
+                commandLine 'scripts/build-native.sh'
+            }
+        }
+        if (project.hasProperty('RUN_DOCKER_BUILD')) {
+            exec {
+                // Run the build-linux-on-docker.sh script if the "RUN_DOCKER_BUILD" flag is set
+                commandLine 'scripts/prepare-docker-image.sh'
+                commandLine 'scripts/build-linux-on-docker.sh'
             }
         }
     }
@@ -71,14 +76,6 @@ processResources {
 tasks.withType(Test) {
     systemProperty "java.library.path", "build/natives/lib"
     testLogging.showStandardStreams = true
-}
-
-task testOnVagrant {
-    if (!isLinux) {
-        exec {
-            commandLine 'scripts/vagrant-test.sh'
-        }
-    }
 }
 
 publishing {

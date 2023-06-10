@@ -9,5 +9,5 @@ echo "Removing build folder ..."
 rm -rf build
 
 echo "Starting build-native.sh ..."
-docker run -it -v ${PROJ_DIR}:${SRC_PATH_CONTAINER} --user $(id -u):$(id -g)  ktls-jni-build ${SRC_PATH_CONTAINER}/scripts/build-native.sh
+docker run -v ${PROJ_DIR}:${SRC_PATH_CONTAINER} --user $(id -u):$(id -g)  ktls-jni-build ${SRC_PATH_CONTAINER}/scripts/build-native.sh
 
