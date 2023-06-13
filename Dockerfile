@@ -6,6 +6,6 @@ RUN apt install -y \
       build-essential \
       libstdc++-10-dev \
       cmake \
-      openjdk-8-jdk-headless \
+      openjdk-11-jdk-headless \
       kmod
 
