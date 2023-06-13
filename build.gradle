@@ -7,12 +7,15 @@ plugins {
 group 'com.linkedin.ktls'
 
 repositories {
+    //Uncomment mavenLocal to publish artifacts to local maven
+    //mavenLocal()
     mavenCentral()
 }
 
 java {
     toolchain {
-        languageVersion = JavaLanguageVersion.of(8)
+        //Used java version 11 for enabling supported cipher suites for enabling KTLS
+        languageVersion = JavaLanguageVersion.of(11)
     }
 }
 
@@ -37,6 +40,8 @@ sourceSets {
 }
 
 compileJava {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
     options.compilerArgs += ["-h", file("src/main/include/jni_generated")]
 }
 
@@ -46,13 +51,17 @@ def isLinux = os.contains("linux")
 task compileJNI {
     dependsOn compileJava
     doLast {
-        exec {
-            commandLine 'scripts/build-native.sh'
-        }
-        if (!isLinux) {
-            /* Run VM using Vagrant to build .so file */
+        // Run the build-native.sh script if the "buildType" flag is set
+        if (project.hasProperty('buildType') && project.getProperty('buildType') == 'native') {
             exec {
-                commandLine 'scripts/vagrant-build-native.sh'
+                commandLine 'scripts/build-native.sh'
+            }
+        } else {
+            exec {
+                commandLine 'scripts/prepare-docker-image.sh'
+            }
+            exec {
+                commandLine 'scripts/build-linux-on-docker.sh'
             }
         }
     }
@@ -73,18 +82,9 @@ tasks.withType(Test) {
     testLogging.showStandardStreams = true
 }
 
-task testOnVagrant {
-    if (!isLinux) {
-        exec {
-            commandLine 'scripts/vagrant-test.sh'
-        }
-    }
-}
-
 publishing {
     publications {
         maven(MavenPublication) {
-            version = '1.0.0-SNAPSHOT'
             from components.java
         }
     }

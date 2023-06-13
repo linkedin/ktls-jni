@@ -5,9 +5,5 @@ PROJ_DIR=$(dirname "$SCRIPT_DIR")
 
 SRC_PATH_CONTAINER=/tmp/ktls-jni
 
-echo "Removing build folder ..."
-rm -rf build
-
-echo "Starting build-native.sh ..."
-docker run -it -v ${PROJ_DIR}:${SRC_PATH_CONTAINER} --user $(id -u):$(id -g)  ktls-jni-build ${SRC_PATH_CONTAINER}/scripts/build-native.sh
-
+echo "Running the native build inside docker ..."
+docker run  --user $(id -u):$(id -g) -v $PROJ_DIR:$SRC_PATH_CONTAINER ktls-jni-build ${SRC_PATH_CONTAINER}/scripts/build-native.sh
