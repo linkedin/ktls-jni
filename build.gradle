@@ -14,6 +14,7 @@ repositories {
 
 java {
     toolchain {
+//        Used java version 11 for enabling supported cipher suites for enabling KTLS
         languageVersion = JavaLanguageVersion.of(11)
     }
 }
@@ -51,16 +52,16 @@ task compileJNI {
     dependsOn compileJava
     doLast {
         // Run the build-native.sh script if the "buildType" flag is set
-        if (project.hasProperty('buildType') && project.getProperty('buildType') == 'docker') {
+        if (project.hasProperty('buildType') && project.getProperty('buildType') == 'native') {
+            exec {
+                commandLine 'scripts/build-native.sh'
+            }
+        } else {
             exec {
                 commandLine 'scripts/prepare-docker-image.sh'
             }
             exec {
                 commandLine 'scripts/build-linux-on-docker.sh'
-            }
-        } else {
-            exec {
-                commandLine 'scripts/build-native.sh'
             }
         }
     }
@@ -84,7 +85,7 @@ tasks.withType(Test) {
 publishing {
     publications {
         maven(MavenPublication) {
-            version = project.hasProperty('version') ? project.getProperty('version') : '0.0.1-SNAPSHOT'
+            version = project.getProperty('version')
             from components.java
         }
     }
