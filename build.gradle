@@ -7,7 +7,8 @@ plugins {
 group 'com.linkedin.ktls'
 
 repositories {
-    mavenLocal()
+//    Uncomment mavenLocal to publish artifacts to local maven
+//    mavenLocal()
     mavenCentral()
 }
 
@@ -38,6 +39,8 @@ sourceSets {
 }
 
 compileJava {
+    sourceCompatibility = '1.8'
+    targetCompatibility = '1.8'
     options.compilerArgs += ["-h", file("src/main/include/jni_generated")]
 }
 
@@ -50,11 +53,14 @@ task compileJNI {
         // Run the build-native.sh script if the "buildType" flag is set
         if (project.hasProperty('buildType') && project.getProperty('buildType') == 'docker') {
             exec {
-                commandLine 'sh', 'scripts/build-linux-on-docker.sh'
+                commandLine 'scripts/prepare-docker-image.sh'
+            }
+            exec {
+                commandLine 'scripts/build-linux-on-docker.sh'
             }
         } else {
             exec {
-                commandLine 'sh', 'scripts/build-native.sh'
+                commandLine 'scripts/build-native.sh'
             }
         }
     }
@@ -78,7 +84,7 @@ tasks.withType(Test) {
 publishing {
     publications {
         maven(MavenPublication) {
-            version = '1.0.0-SNAPSHOT'
+            version = project.hasProperty('version') ? project.getProperty('version') : '0.0.1-SNAPSHOT'
             from components.java
         }
     }
