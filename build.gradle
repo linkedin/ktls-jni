@@ -7,14 +7,14 @@ plugins {
 group 'com.linkedin.ktls'
 
 repositories {
-//    Uncomment mavenLocal to publish artifacts to local maven
-//    mavenLocal()
+    //Uncomment mavenLocal to publish artifacts to local maven
+    //mavenLocal()
     mavenCentral()
 }
 
 java {
     toolchain {
-//        Used java version 11 for enabling supported cipher suites for enabling KTLS
+        //Used java version 11 for enabling supported cipher suites for enabling KTLS
         languageVersion = JavaLanguageVersion.of(11)
     }
 }
@@ -85,7 +85,6 @@ tasks.withType(Test) {
 publishing {
     publications {
         maven(MavenPublication) {
-            version = project.getProperty('version')
             from components.java
         }
     }
