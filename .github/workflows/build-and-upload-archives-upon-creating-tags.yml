@@ -3,8 +3,6 @@ name: Release build on tags
 # Run this workflow every time a tag is created/pushed
 on:
   push:
-    branches:
-      - ktls-git-actions
     tags:
       - '*'
 
