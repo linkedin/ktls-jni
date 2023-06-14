@@ -5,7 +5,16 @@ plugins {
 }
 
 group 'com.linkedin.ktls'
+ext {
 
+    jfrogUsername = System.getenv('JFROG_USERNAME')
+    jfrogApiKey = System.getenv('JFROG_API_KEY')
+
+    // By default, publish to JFrog.
+    mavenUrl = project.hasProperty('mavenUrl') ? project.mavenUrl : jfrogRepoUrl
+    mavenUsername = project.hasProperty('mavenUsername') ? project.mavenUsername : jfrogUsername
+    mavenPassword = project.hasProperty('mavenPassword') ? project.mavenPassword : jfrogApiKey
+}
 repositories {
     //Uncomment mavenLocal to publish artifacts to local maven
     //mavenLocal()
@@ -83,6 +92,15 @@ tasks.withType(Test) {
 }
 
 publishing {
+    repositories {
+        maven {
+            url = mavenUrl
+            credentials {
+                username = mavenUsername
+                password = mavenPassword
+            }
+        }
+    }
     publications {
         maven(MavenPublication) {
             from components.java
@@ -95,3 +113,5 @@ publishToMavenLocal.dependsOn(assemble)
 task install {
     dependsOn publishToMavenLocal
 }
+
+publish.dependsOn install
