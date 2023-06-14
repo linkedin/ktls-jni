@@ -38,4 +38,4 @@ jobs:
           JFROG_API_KEY: ${{ secrets.JFROG_API_KEY }}
         # Maintain lexicographical order for subprojects
         run: |
-          ./gradlew -PbuildType=docker -Pversion=${{ env.RELEASE_VERSION }} publish --no-daemon
+          ./gradlew -PbuildType=native -Pversion=${{ env.RELEASE_VERSION }} publish --no-daemon
