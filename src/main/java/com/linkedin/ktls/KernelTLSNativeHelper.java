@@ -2,6 +2,7 @@ package com.linkedin.ktls;
 
 import com.linkedin.ktls.util.Native;
 import com.linkedin.ktls.util.ReflectionUtils;
+import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -102,14 +103,14 @@ class KernelTLSNativeHelper {
 
   private native String[] getSupportedSymmetricCiphers();
 
-  public void sendCloseNotify(SocketChannel socketChannel) {
+  public void sendCloseNotify(SocketChannel socketChannel) throws IOException {
     final int socketFd = extractFd(socketChannel);
     final byte[] data = new byte[2];
     data[0] = ALERT_LEVEL_WARNING;
     data[1] = ALERT_CLOSE_NOTIFY;
     int result = sendControlMessage(socketFd, RECORD_TYPE_ALERT, data);
     if (result < 0) {
-      throw new RuntimeException("Failed to send close_notify alert");
+      throw new IOException("Failed to send close_notify alert");
     }
   }
 

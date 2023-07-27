@@ -1,6 +1,7 @@
 package com.linkedin.ktls;
 
 import com.linkedin.ktls.util.Native;
+import java.io.IOException;
 import java.nio.channels.SocketChannel;
 import java.util.List;
 import javax.net.ssl.SSLEngine;
@@ -27,7 +28,7 @@ public class KernelTls {
     kernelTLSNativeHelper.enableKernelTlsForSend(socketChannel, tlsParameters);
   }
 
-  public void closeNotify(SocketChannel socketChannel) {
+  public void closeNotify(SocketChannel socketChannel) throws IOException {
     kernelTLSNativeHelper.sendCloseNotify(socketChannel);
   }
 
