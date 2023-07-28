@@ -17,6 +17,7 @@ class KernelTLSNativeHelper {
   private static final int UNSUPPORTED_OPERATION = 6003;
   private static final int UNABLE_TO_SET_TLS_MODE = 6004;
   private static final int UNABLE_TO_SET_TLS_PARAMS = 6005;
+  private static final int BUFFER_OVERRUN = 6006;
 
   private static final byte RECORD_TYPE_ALERT = 21;
   private static final byte ALERT_LEVEL_WARNING = 1;
@@ -26,16 +27,33 @@ class KernelTLSNativeHelper {
     Native.load();
   }
 
+  /**
+   * Extracts the file descriptor associated with the given SocketChannel.
+   *
+   * @param socketChannel The SocketChannel from which to extract the file descriptor.
+   * @return The integer file descriptor associated with the SocketChannel.
+   * @throws IllegalArgumentException If there is an error while extracting the file descriptor.
+   */
   int extractFd(SocketChannel socketChannel) {
     try {
+      // Retrieve the 'fd' field from the 'sun.nio.ch.SocketChannelImpl' class using ReflectionUtils.
       final Object fileDescriptor =
           ReflectionUtils.getValueAtField("sun.nio.ch.SocketChannelImpl", "fd", socketChannel);
+      // Convert the result to an integer and return it as the file descriptor.
       return (int) ReflectionUtils.getValueAtField("java.io.FileDescriptor", "fd", fileDescriptor);
     } catch (Exception e) {
+      // If there is any exception while extracting the file descriptor, wrap it in an IllegalArgumentException
+      // and rethrow it to signal an error.
       throw new IllegalArgumentException(e);
     }
   }
 
+  /**
+   * This function tries to enable kernelTLS for send based on the symmetric cipher value.
+   * @param socketChannel SocketChannel object to enable kernelTLS on
+   * @param tlsParameters TlsParameters with the symmetric cipher based on which we decide if kernel TLS can be enabled.
+   * @throws KTLSEnableFailedException
+   */
   void enableKernelTlsForSend(SocketChannel socketChannel, TlsParameters tlsParameters)
       throws KTLSEnableFailedException {
     final int fd;
@@ -62,27 +80,47 @@ class KernelTLSNativeHelper {
         throw new IllegalStateException();
     }
     if (retCode != 0) {
-      throw buildExceptionForReturnCode(retCode);
+      throw buildExceptionForReturnCode(retCode, tlsParameters.symmetricCipher);
     }
   }
 
-  private KTLSEnableFailedException buildExceptionForReturnCode(int retCode) {
+  /**
+   * This function is to throw the respective exception based on the return value from the underlying JNI kernel TLS enable call.
+   * Also used OS version and symmetric cipher version for logging the exceptions.
+   * @param retCode Return value after performing kernel TLS enabled send
+   * @param symmetricCipher Symmetric cipher used for logging in the exceptions.
+   * @return
+   */
+  private KTLSEnableFailedException buildExceptionForReturnCode(int retCode, SymmetricCipher symmetricCipher) {
+    String osVersion = System.getProperty("os.version");
     switch (retCode) {
       case UNSUPPORTED_OPERATING_SYSTEM:
-        return new KTLSEnableFailedException("ktls-jni was not built with support for this operating system");
+        return new KTLSEnableFailedException(
+            "ktls-jni was not built with support for this operating system. os version: " + osVersion
+                + ", symmetricCipher: " + symmetricCipher);
       case UNSUPPORTED_CIPHER:
-        return new KTLSEnableFailedException("ktls-jni was not built with support for the specified cipher");
+        return new KTLSEnableFailedException(
+            "ktls-jni was not built with support for the specified cipher. os version: " + osVersion
+                + ", symmetricCipher: " + symmetricCipher);
       case UNSUPPORTED_OPERATION:
-        return new KTLSEnableFailedException("This action is not supported.");
+        return new KTLSEnableFailedException(
+            "This action is not supported. os version: " + osVersion + ", symmetricCipher: " + symmetricCipher);
       case UNABLE_TO_SET_TLS_MODE:
         return new KTLSEnableFailedException("Unable to set socket to TLS mode. "
-            + "This may indicate that the \"tls\" kernel module is not enabled.");
+            + "This may indicate that the \"tls\" kernel module is not enabled on os version: " + osVersion
+            + ", symmetricCipher: " + symmetricCipher);
       case UNABLE_TO_SET_TLS_PARAMS:
         return new KTLSEnableFailedException("Unable to set TLS parameters on socket. "
-            + "This is an unexpected scenario and needs further investigation.");
+            + "This is an unexpected scenario and needs further investigation. os version: " + osVersion
+            + ", symmetricCipher: " + symmetricCipher);
+      case BUFFER_OVERRUN:
+        return new KTLSEnableFailedException(
+            "Found buffer overrun during copy array call. os version: " + osVersion + ", symmetricCipher: "
+                + symmetricCipher);
       default:
         return new KTLSEnableFailedException(String.format(
-            "Unexpected error when trying to initialize Kernel TLS, return code %s", retCode));
+            "Unexpected error when trying to initialize Kernel TLS, return code %s. os version : %s , symmetricCipher: %s",
+            retCode, osVersion, symmetricCipher));
     }
   }
 
@@ -93,6 +131,10 @@ class KernelTLSNativeHelper {
   private native int enableKernelTlsForSend_CHACHA20_POLY1305(
       int fd, int version_code, byte[] iv, byte[] key, byte[] salt, byte[] rec_seq);
 
+  /**
+   * This method is used to populate the supported symmetric ciphers using an ciphers array returned from NativeHelper.cpp.
+   * @return List<String> containing the cipher suites list.
+   */
   public List<String> getSupportedCipherSuites() {
     final Set<String> supportedSymmetricCiphers = new HashSet<>(Arrays.asList(getSupportedSymmetricCiphers()));
     return Arrays.stream(CipherSuite.values())
@@ -103,6 +145,11 @@ class KernelTLSNativeHelper {
 
   private native String[] getSupportedSymmetricCiphers();
 
+  /**
+   * This method is used to extract the file descriptor and send a close alert to the file descriptor.
+   * @param socketChannel SocketChannel object that is to be closed
+   * @throws IOException
+   */
   public void sendCloseNotify(SocketChannel socketChannel) throws IOException {
     final int socketFd = extractFd(socketChannel);
     final byte[] data = new byte[2];
