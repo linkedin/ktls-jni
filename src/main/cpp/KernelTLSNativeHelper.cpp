@@ -40,14 +40,6 @@ int enableTlsWithCryptoInfo(int socketFd, bool sendingMode, void* crypto_info, u
     return 0;
 }
 
-void throwKTLSEnableFailedException(JNIEnv* env, const char* message) {
-    jclass exceptionClass = env->FindClass("com/linkedin/ktls/KTLSEnableFailedException");
-    if (exceptionClass != NULL) {
-        env->ThrowNew(exceptionClass, message);
-        env->DeleteLocalRef(exceptionClass);
-    }
-}
-
 int copyArray(JNIEnv *env, jbyteArray &src, unsigned char *dest, size_t destSize) {
     jbyte* srcArr = env->GetByteArrayElements(src, NULL);
     jsize len = env->GetArrayLength(src);
