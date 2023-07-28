@@ -53,6 +53,7 @@ int copyArray(JNIEnv *env, jbyteArray &src, unsigned char *dest, size_t destSize
     jsize len = env->GetArrayLength(src);
 
     if (len > destSize) {
+        env->ReleaseByteArrayElements(src, srcArr, JNI_ABORT);
         return -1;
     }
 
@@ -60,7 +61,7 @@ int copyArray(JNIEnv *env, jbyteArray &src, unsigned char *dest, size_t destSize
         dest[idx] = (unsigned char) srcArr[idx];
     }
     env->ReleaseByteArrayElements(src, srcArr, JNI_ABORT);
-    return 0;
+    return len;
 }
 #endif
 
