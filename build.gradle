@@ -104,6 +104,16 @@ publishing {
     publications {
         maven(MavenPublication) {
             from components.java
+            pom {
+                url = 'https://github.com/linkedin/ktls-jni'
+                licenses {
+                    license {
+                        name = 'BSD 2-Clause License'
+                        url = 'https://opensource.org/licenses/BSD-2-Clause'
+                        distribution = 'repo'
+                    }
+                }
+            }
         }
     }
 }

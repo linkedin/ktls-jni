@@ -40,13 +40,20 @@ int enableTlsWithCryptoInfo(int socketFd, bool sendingMode, void* crypto_info, u
     return 0;
 }
 
-void copyArray(JNIEnv *env, jbyteArray &src, unsigned char *dest) {
+int copyArray(JNIEnv *env, jbyteArray &src, unsigned char *dest, size_t destSize) {
     jbyte* srcArr = env->GetByteArrayElements(src, NULL);
     jsize len = env->GetArrayLength(src);
+
+    if (len > destSize) {
+        env->ReleaseByteArrayElements(src, srcArr, JNI_ABORT);
+        return -1;
+    }
+
     for (int idx = 0; idx < len; idx++) {
         dest[idx] = (unsigned char) srcArr[idx];
     }
     env->ReleaseByteArrayElements(src, srcArr, JNI_ABORT);
+    return len;
 }
 #endif
 
@@ -59,10 +66,12 @@ JNIEXPORT jint JNICALL Java_com_linkedin_ktls_KernelTLSNativeHelper_enableKernel
     struct tls12_crypto_info_aes_gcm_128 crypto_info;
     crypto_info.info.version = versionCode;
     crypto_info.info.cipher_type = TLS_CIPHER_AES_GCM_128;
-    copyArray(env, iv, crypto_info.iv);
-    copyArray(env, key, crypto_info.key);
-    copyArray(env, salt, crypto_info.salt);
-    copyArray(env, rec_seq, crypto_info.rec_seq);
+    int result_iv = copyArray(env, iv, crypto_info.iv, sizeof(crypto_info.iv));
+    int result_key = copyArray(env, key, crypto_info.key, sizeof(crypto_info.key));
+    int result_salt = copyArray(env, salt, crypto_info.salt, sizeof(crypto_info.salt));
+    int result_rec_seq = copyArray(env, rec_seq, crypto_info.rec_seq, sizeof(crypto_info.rec_seq));
+    if(result_iv == -1 || result_key == -1 || result_salt == -1 || result_rec_seq == -1)
+      return com_linkedin_ktls_KernelTLSNativeHelper_BUFFER_OVERRUN;
     return enableTlsWithCryptoInfo(socketFd, true, &crypto_info, sizeof(crypto_info));
 #endif
 }
@@ -76,10 +85,12 @@ JNIEXPORT jint JNICALL Java_com_linkedin_ktls_KernelTLSNativeHelper_enableKernel
     struct tls12_crypto_info_aes_gcm_256 crypto_info;
     crypto_info.info.version = versionCode;
     crypto_info.info.cipher_type = TLS_CIPHER_AES_GCM_256;
-    copyArray(env, iv, crypto_info.iv);
-    copyArray(env, key, crypto_info.key);
-    copyArray(env, salt, crypto_info.salt);
-    copyArray(env, rec_seq, crypto_info.rec_seq);
+    int result_iv = copyArray(env, iv, crypto_info.iv, sizeof(crypto_info.iv));
+    int result_key = copyArray(env, key, crypto_info.key, sizeof(crypto_info.key));
+    int result_salt = copyArray(env, salt, crypto_info.salt, sizeof(crypto_info.salt));
+    int result_rec_seq = copyArray(env, rec_seq, crypto_info.rec_seq, sizeof(crypto_info.rec_seq));
+    if(result_iv == -1 || result_key == -1 || result_salt == -1 || result_rec_seq == -1)
+      return com_linkedin_ktls_KernelTLSNativeHelper_BUFFER_OVERRUN;
     return enableTlsWithCryptoInfo(socketFd, true, &crypto_info, sizeof(crypto_info));
 #endif
 }
@@ -93,10 +104,12 @@ JNIEXPORT jint JNICALL Java_com_linkedin_ktls_KernelTLSNativeHelper_enableKernel
     struct tls12_crypto_info_chacha20_poly1305 crypto_info;
     crypto_info.info.version = versionCode;
     crypto_info.info.cipher_type = TLS_CIPHER_CHACHA20_POLY1305;
-    copyArray(env, iv, crypto_info.iv);
-    copyArray(env, key, crypto_info.key);
-    copyArray(env, salt, crypto_info.salt);
-    copyArray(env, rec_seq, crypto_info.rec_seq);
+    int result_iv = copyArray(env, iv, crypto_info.iv, sizeof(crypto_info.iv));
+    int result_key = copyArray(env, key, crypto_info.key, sizeof(crypto_info.key));
+    int result_salt = copyArray(env, salt, crypto_info.salt, sizeof(crypto_info.salt));
+    int result_rec_seq = copyArray(env, rec_seq, crypto_info.rec_seq, sizeof(crypto_info.rec_seq));
+    if(result_iv == -1 || result_key == -1 || result_salt == -1 || result_rec_seq == -1)
+      return com_linkedin_ktls_KernelTLSNativeHelper_BUFFER_OVERRUN;
     return enableTlsWithCryptoInfo(socketFd, true, &crypto_info, sizeof(crypto_info));
 #endif
 }
