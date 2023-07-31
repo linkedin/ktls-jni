@@ -48,6 +48,10 @@ public enum Native {
       resourceName() + " or load " + libnameShort + " from system libraries. Please " +
       "try building from source the jar or providing " + libname + " in your system.";
 
+  /**
+   * This method is used to get the name of the operating system
+   * @return String containing osName
+   */
   private static String osName() {
     String os = System.getProperty("os.name").toLowerCase().replace(' ', '_');
     if (os.startsWith("win")){
@@ -59,6 +63,10 @@ public enum Native {
     }
   }
 
+  /**
+   * This method is used to get the library extension based on the operating system.
+   * @return String containing library extension
+   */
   private static String libExtension() {
     if (osName().contains("os_x") || osName().contains("darwin")) {
       return "dylib";
@@ -69,16 +77,28 @@ public enum Native {
     }
   }
 
+  /**
+   * This method is used to get the resource name of the shared library
+   * @return
+   */
   private static String resourceName() {
     return "/" + libname + "." + libExtension();
   }
 
+  // This is a flag to keep track if the native library has been loaded
   private static boolean loaded = false;
 
+  /**
+   * This method is used to load the native library
+   */
   public static synchronized void load() {
     load(null);
   }
 
+  /**
+   * This method is used to load the native library with an optional temporary folder
+   * @param tempFolder File to store optional temp folder if any.
+   */
   public static synchronized void load(final File tempFolder) {
     if (loaded) {
       return;
