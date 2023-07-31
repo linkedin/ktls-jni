@@ -25,13 +25,12 @@ const char* CHACHA20_POLY1305_CIPHER_NAME = "CHACHA20_POLY1305";
 
 
 /**
-  * This method enables Kernel TLS for a specified socket by setting TCP_ULP to tls
-  * This method is available only when NO_KTLS flag is not set
-  * @param socketFd file descriptor on which kTLS has to be enabled.
+ * This method enables Kernel TLS for a specified socket by setting TCP_ULP to tls
+ * This method is available only when NO_KTLS flag is not set
+ * @param socketFd file descriptor on which kTLS has to be enabled.
 */
 #ifndef NO_KTLS
 int startKernelTls(jint socketFd) {
-
     return setsockopt(socketFd, SOL_TCP, TCP_ULP, "tls", sizeof("tls"));
 }
 
@@ -75,7 +74,9 @@ int copyArray(JNIEnv *env, jbyteArray &src, unsigned char *dest, size_t destSize
         return -1;
     }
 
-    memcpy(dest, reinterpret_cast<unsigned char*>(srcArr), len);
+    for (int idx = 0; idx < len; idx++) {
+        dest[idx] = (unsigned char) srcArr[idx];
+    }
     env->ReleaseByteArrayElements(src, srcArr, JNI_ABORT);
     return len;
 }
