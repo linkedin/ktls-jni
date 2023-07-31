@@ -28,7 +28,7 @@ const char* CHACHA20_POLY1305_CIPHER_NAME = "CHACHA20_POLY1305";
  * This method enables Kernel TLS for a specified socket by setting TCP_ULP to tls
  * This method is available only when NO_KTLS flag is not set
  * @param socketFd file descriptor on which kTLS has to be enabled.
-*/
+ */
 #ifndef NO_KTLS
 int startKernelTls(jint socketFd) {
     return setsockopt(socketFd, SOL_TCP, TCP_ULP, "tls", sizeof("tls"));
