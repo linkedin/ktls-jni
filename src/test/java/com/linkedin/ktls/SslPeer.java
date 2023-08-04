@@ -64,6 +64,7 @@ public class SslPeer {
 
   /**
    * Performs the WRAP function
+   *
    * @return SSLEngineResult
    * @throws IOException
    */
@@ -89,6 +90,7 @@ public class SslPeer {
   /**
    * Flushes the buffer to the network, non blocking.
    * Visible for testing.
+   *
    * @param buf ByteBuffer
    * @return boolean true if the buffer has been emptied out, false otherwise
    * @throws IOException
@@ -104,6 +106,7 @@ public class SslPeer {
 
   /**
    * This method is to read from socket channel to netReadBuffer.
+   *
    * @return number of bytes read
    * @throws IOException
    */
@@ -113,6 +116,7 @@ public class SslPeer {
 
   /**
    * This method is to perform handshake unwrap.
+   *
    * @return SSLEngineResult
    * @throws IOException thrown in the cases of handshake failure.
    */
@@ -147,6 +151,7 @@ public class SslPeer {
 
   /**
    * This method is to run SSLEngine tasks needed.
+   *
    * @return HandshakeStatus
    */
   private SSLEngineResult.HandshakeStatus runDelegatedTasks() {
@@ -162,6 +167,7 @@ public class SslPeer {
 
   /**
    * This method is used to transfer contents from appReadBuffer to dst byte buffer.
+   *
    * @param dst dst byte buffer
    * @return the number of bytes read
    */

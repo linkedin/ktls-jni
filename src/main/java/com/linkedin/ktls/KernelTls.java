@@ -43,6 +43,7 @@ public class KernelTls {
   /**
    * This method is a wrapper on top of the corresponding method in KernelTLSNativeHelper
    * to closeNotify a socket channel.
+   *
    * @param socketChannel SocketChannel object
    * @throws IOException returned in cases of improper close notifying of the socket channel,
    * due to possible issues like broken pipe, etc.
@@ -54,6 +55,7 @@ public class KernelTls {
   /**
    * This method is a wrapper for calling the kernelTLSNativeHelper to get supported cipher
    * suites.
+   *
    * @return List of supported cipher strings
    */
   public List<String> supportedCipherSuites() {

@@ -58,6 +58,7 @@ class KernelTLSNativeHelper {
   /**
    * This function tries to enable kernelTLS for send based on the symmetric cipher value. The supported
    * symmetric ciphers are AES_GCM_128, AES_GCM_256 and CHACHA20_POLY1305.
+   *
    * @param socketChannel SocketChannel object to enable kernelTLS on
    * @param tlsParameters TlsParameters with the symmetric cipher based on which we decide if kernel TLS can be enabled.
    * @throws KTLSEnableFailedException failed to enable ktls
@@ -95,6 +96,7 @@ class KernelTLSNativeHelper {
   /**
    * This function is to throw the respective exception based on the return value from the underlying JNI kernel TLS enable call.
    * Also used OS version and symmetric cipher version for logging the exceptions.
+   *
    * @param retCode Return value after performing kernel TLS enabled send
    * @param symmetricCipher Symmetric cipher used for logging in the exceptions.
    * @return KTLSEnableFailedException
@@ -141,6 +143,7 @@ class KernelTLSNativeHelper {
 
   /**
    * This method is used to populate the supported symmetric ciphers using an ciphers array returned from NativeHelper.cpp.
+   *
    * @return List<String> containing the cipher suites list.
    */
   public List<String> getSupportedCipherSuites() {
@@ -155,6 +158,7 @@ class KernelTLSNativeHelper {
 
   /**
    * This method is used to extract the file descriptor and send a close alert to the file descriptor.
+   *
    * @param socketChannel SocketChannel object that is to be closed
    * @throws IOException thrown in the cases of failure in close notify of alert.
    */

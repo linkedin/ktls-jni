@@ -26,6 +26,7 @@ class TlsParametersExtractor {
    * Note that this method is using Java reflection to extract the private fields
    * associated with a SSLEngine object and therefore is fragile and might break in future JAVA versions.
    * It has been tested on MSFT JDK 11 and linux kernel versions >= 5.4.
+   *
    * @param sslEngine SSLEngine object
    * @return TlsParameters
    * @throws KTLSEnableFailedException failed to enable ktls
@@ -48,6 +49,7 @@ class TlsParametersExtractor {
    * version after extracting the necessary fields from sslEngine. Note that this method is using Java
    * reflection to extract the private fields associated with a SSLEngine object and therefore is fragile
    * and might break in future JAVA versions. It has been tested on MSFT JDK 11 and linux kernel versions >=5.4
+   *
    * @param sslEngine SSLEngine object
    * @return TlsParameters
    * @throws KTLSEnableFailedException failed to enable ktls
@@ -88,6 +90,7 @@ class TlsParametersExtractor {
    * Note that this method is using Java reflection to extract the private fields associated with a
    * SSLEngine object and therefore is fragile and might break in future JAVA versions. It has been
    * tested on MSFT JDK 11 and linux kernel versions >= 5.4
+   *
    * @param sslEngine SSLEngine
    * @return TlsParameters
    * @throws KTLSEnableFailedException failed to enable ktls
@@ -128,6 +131,7 @@ class TlsParametersExtractor {
 
   /**
    * Utility method to check if a cipher suite is supported by a TLS protocol version.
+   *
    * @param protocolVersion ProtocolVersion
    * @param cipherSuite CipherSuite
    * @return boolean
@@ -144,6 +148,7 @@ class TlsParametersExtractor {
    * no TLSv1.3 support. Note that this method is using Java reflection to extract the private fields associated with a SSLEngine
    * object and therefore is fragile and might break in future JAVA versions. It has been tested on MSFT JDK 11 and
    * linux kernel versions >= 5.4
+   *
    * @param protocolVersion ProtocolVersion
    * @param cipherSuite CipherSuite
    * @param cipherBox Used reflection to extract Cipher Box objects
@@ -177,6 +182,7 @@ class TlsParametersExtractor {
   /**
    * This builder method is used to invoke the respective TLS extractor method based on cipher suite and protocol
    * version.
+   *
    * @param protocolVersion ProtocolVersion
    * @param cipherSuite CipherSuite
    * @return V2Extractor
