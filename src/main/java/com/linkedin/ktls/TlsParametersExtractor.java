@@ -7,6 +7,13 @@ import java.util.Arrays;
 import javax.net.ssl.SSLEngine;
 
 
+/**
+ * This class is used to extract the TLS Parameters from SSL Engine object based on respective cipher suites,
+ * TLS protocol version and other parameters.
+ * This class involves usage of reflection on JVM internals and therefore is fragile. The functionality of
+ * this class has been tested on openjdk version "1.8.0_372" and linux kernel versions >= 4.17 and is likely
+ * to break in a future version.
+ */
 class TlsParametersExtractor {
 
   private static final String SSL_PACKAGE_PREFIX = "sun.security.ssl.";
@@ -14,6 +21,15 @@ class TlsParametersExtractor {
   private static final int GCM_IV_SIZE = 8;
   private static final int SEQ_NUMBER_SIZE = 8;
 
+  /**
+   * This method is used to invoke the respective extractor method based on TLS protocol version supported.
+   * Note that this method is using Java reflection to extract the private fields
+   * associated with a SSLEngine object and therefore is fragile and might break in future JAVA versions.
+   * It has been tested on openjdk version "1.8.0_372" and linux kernel versions >= 4.17.
+   * @param sslEngine SSLEngine object
+   * @return
+   * @throws KTLSEnableFailedException
+   */
   public TlsParameters extract(SSLEngine sslEngine) throws KTLSEnableFailedException {
     try {
       ReflectionUtils.getValueAtField(getSslClass("SSLEngineImpl"), "conContext", sslEngine);
@@ -26,6 +42,17 @@ class TlsParametersExtractor {
     }
   }
 
+  /**
+   * This method is used to invoke the respective extractor method when TLSv1.3 support is not present.
+   * Extractor for AES_GCM cipher suite version after verifying the compatibility of cipher with protocol
+   * version after extracting the necessary fields from sslEngine. Note that this method is using Java
+   * reflection to extract the private fields associated with a SSLEngine object and therefore is fragile
+   * and might break in future JAVA versions. It has been tested on openjdk version "1.8.0_372" and linux
+   * kernel versions >= 4.17.
+   * @param sslEngine SSLEngine object
+   * @return
+   * @throws KTLSEnableFailedException
+   */
   private TlsParameters extractForJdkWithoutTLS1_3Support(SSLEngine sslEngine) throws KTLSEnableFailedException {
     try {
       final Object sslSession = ReflectionUtils.getValueAtField(getSslClass("SSLEngineImpl"), "sess", sslEngine);
@@ -57,6 +84,15 @@ class TlsParametersExtractor {
     }
   }
 
+  /**
+   * This method is used to invoke the respective extractor method when TLSv1.3 support is present.
+   * Note that this method is using Java reflection to extract the private fields associated with a
+   * SSLEngine object and therefore is fragile and might break in future JAVA versions. It has been
+   * tested on openjdk version "1.8.0_372" and linux kernel versions >= 4.17.
+   * @param sslEngine
+   * @return
+   * @throws KTLSEnableFailedException
+   */
   private TlsParameters extractForJdkWithTLS1_3Support(SSLEngine sslEngine) throws KTLSEnableFailedException {
     try {
       final Object transportContext =
@@ -91,6 +127,12 @@ class TlsParametersExtractor {
     }
   }
 
+  /**
+   * Utility method to check if a cipher suite is supported by a TLS protocol version.
+   * @param protocolVersion ProtocolVersion
+   * @param cipherSuite CipherSuite
+   * @return
+   */
   private boolean isCipherSuiteUnsupported(ProtocolVersion protocolVersion, CipherSuite cipherSuite) {
     if (protocolVersion == null || cipherSuite == null) {
       return true;
@@ -98,6 +140,18 @@ class TlsParametersExtractor {
     return !cipherSuite.supportedVersions.contains(protocolVersion);
   }
 
+  /**
+   * This method is used to build TLSParameters for AES_GCM cipher suites with salt, iv, key, sequence number with
+   * no TLSv1.3 support. Note that this method is using Java reflection to extract the private fields associated with a SSLEngine
+   * object and therefore is fragile and might break in future JAVA versions. It has been tested on openjdk
+   * version "1.8.0_372" and linux kernel versions >= 4.17.
+   * @param protocolVersion ProtocolVersion
+   * @param cipherSuite CipherSuite
+   * @param cipherBox Used reflection to extract Cipher Box objects
+   * @param authenticator Used reflection to extract authenticator objects
+   * @return
+   * @throws Exception
+   */
   private TlsParameters extractParametersV1AES_GCM(
       ProtocolVersion protocolVersion, CipherSuite cipherSuite,
       Object cipherBox, Object authenticator) throws Exception {
@@ -121,6 +175,13 @@ class TlsParametersExtractor {
         protocolVersion, cipherSuite.symmetricCipher, new byte[GCM_IV_SIZE], key, salt, sequenceNumber);
   }
 
+  /**
+   * This builder method is used to invoke the respective TLS extractor method based on cipher suite and protocol
+   * version.
+   * @param protocolVersion ProtocolVersion
+   * @param cipherSuite CipherSuite
+   * @return V2Extractor
+   */
   private V2Extractor buildV2Extractor(ProtocolVersion protocolVersion, CipherSuite cipherSuite) {
     if (protocolVersion == ProtocolVersion.TLS_1_2) {
       if (cipherSuite.symmetricCipher == SymmetricCipher.AES_GCM_128) {
@@ -146,6 +207,9 @@ class TlsParametersExtractor {
     return SSL_PACKAGE_PREFIX + classSimpleName;
   }
 
+  /**
+   * Interface for defining the methods that will be implemented for extracting TLS Parameters.
+   */
   interface V2Extractor {
     default byte[] extractSequenceNumber(Object writeCipher)
         throws ClassNotFoundException, InvocationTargetException, NoSuchMethodException, IllegalAccessException,
@@ -161,6 +225,9 @@ class TlsParametersExtractor {
                NoSuchMethodException;
   }
 
+  /**
+   * The class defines extractor methods that can be invoked in cases of jdk with TLSv1.2 support
+   */
   private static abstract class TLS12GcmExtractor implements V2Extractor {
     private final int keySize;
     private final ProtocolVersion protocolVersion;
@@ -193,6 +260,9 @@ class TlsParametersExtractor {
     }
   }
 
+  /**
+   * This class is used to construct the Extractor object for AES128GCM cipher suites with TLSv1.2 support.
+   */
   private static class TLS12Aes128GcmExtractor extends TLS12GcmExtractor {
     private static final int KEY_SIZE = 16;
     public TLS12Aes128GcmExtractor(ProtocolVersion protocolVersion, CipherSuite cipherSuite) {
@@ -200,6 +270,9 @@ class TlsParametersExtractor {
     }
   }
 
+  /**
+   * This class is used to construct the Extractor object for AES256GCM cipher suites with TLSv1.2 support.
+   */
   private static class TLS12Aes256GcmExtractor extends TLS12GcmExtractor {
     private static final int KEY_SIZE = 32;
     public TLS12Aes256GcmExtractor(ProtocolVersion protocolVersion, CipherSuite cipherSuite) {
@@ -207,6 +280,9 @@ class TlsParametersExtractor {
     }
   }
 
+  /**
+   * The class defines extractor methods that can be invoked in cases of jdk with TLSv1.3 support
+   */
   private static abstract class TLS13GcmExtractor implements V2Extractor {
     private final int keySize;
     private final ProtocolVersion protocolVersion;
@@ -241,6 +317,9 @@ class TlsParametersExtractor {
     }
   }
 
+  /**
+   * This class is used to construct the Extractor object for AES128GCM cipher suites with TLSv1.3 support.
+   */
   private static class TLS13Aes128GcmExtractor extends TLS13GcmExtractor {
     private static final int KEY_SIZE = 16;
     public TLS13Aes128GcmExtractor(ProtocolVersion protocolVersion, CipherSuite cipherSuite) {
@@ -248,6 +327,9 @@ class TlsParametersExtractor {
     }
   }
 
+  /**
+   * This class is used to construct the Extractor object for AES256GCM cipher suites with TLSv1.3 support.
+   */
   private static class TLS13Aes256GcmExtractor extends TLS13GcmExtractor {
     private static final int KEY_SIZE = 32;
     public TLS13Aes256GcmExtractor(ProtocolVersion protocolVersion, CipherSuite cipherSuite) {
@@ -255,6 +337,9 @@ class TlsParametersExtractor {
     }
   }
 
+  /**
+   * The class defines extractor methods that can be invoked in cases of CHACHA20_POLY1305 with TLSv1.2 support.
+   */
   private static abstract class CC20P1305Extractor implements V2Extractor {
     private static final int SALT_SIZE = 0;
     private static final int IV_SIZE = 12;
@@ -291,6 +376,9 @@ class TlsParametersExtractor {
     }
   }
 
+  /**
+   * This class is used to construct the Extractor object for CHACHA20_POLY1305 cipher suites with TLSv1.2 support.
+   */
   private static class TLS12CC20P1305Extractor extends CC20P1305Extractor {
     public TLS12CC20P1305Extractor(ProtocolVersion protocolVersion, CipherSuite cipherSuite) {
       super(protocolVersion, cipherSuite,
@@ -298,6 +386,9 @@ class TlsParametersExtractor {
     }
   }
 
+  /**
+   * This class is used to construct the Extractor object for CHACHA20_POLY1305 cipher suites with TLSv1.3 support.
+   */
   private static class TLS13CC20P1305Extractor extends CC20P1305Extractor {
     public TLS13CC20P1305Extractor(ProtocolVersion protocolVersion, CipherSuite cipherSuite) {
       super(protocolVersion, cipherSuite,

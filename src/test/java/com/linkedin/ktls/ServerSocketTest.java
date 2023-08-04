@@ -11,6 +11,10 @@ import org.junit.jupiter.api.Test;
 import static org.junit.jupiter.api.Assertions.*;
 
 
+/**
+ * This test class is used to verify the connection between client and server socket.
+ * Write is performed to byte buffer after establishing connection and write is verified.
+ */
 public class ServerSocketTest {
   @Test
   void test() throws Exception {

@@ -16,6 +16,10 @@ import static com.linkedin.ktls.ProtocolVersion.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 
+/**
+ *  This test class includes validation end-to-end tests to check TlsParameter extraction by encrypt-decrypt testing
+ *  of plain text messages based on Tls protocol version and cipher suite version.
+ */
 public class TlsParametersV2ExtractorTest extends KernelTLSTestBase {
   private static final int MIN_PLAINTEXT_SIZE = 256;
   private static final int MAX_PLAINTEXT_SIZE = 512;
@@ -62,6 +66,16 @@ public class TlsParametersV2ExtractorTest extends KernelTLSTestBase {
     validate_decrypted_record(tlsProtocolVersion, cipherSuite, tlsCipher);
   }
 
+  /**
+   * This is a test method to validate the decryption of a record using TLS. This includes setting up
+   * the TLS handshake, generating random plain text of variable size for encryption testing, encrypt the generated
+   * plain text using the specified TLS cipher and parameters, attempt to decrypt the encrypted record using the
+   * server-side SSL engine and verifying with the original plain text message.
+   * @param tlsProtocolVersion
+   * @param cipherSuite
+   * @param tlsCipher
+   * @throws Exception
+   */
   void validate_decrypted_record(
       ProtocolVersion tlsProtocolVersion, CipherSuite cipherSuite, TlsCipher tlsCipher) throws Exception {
     setupTlsHandshake(tlsProtocolVersion.versionName, cipherSuite.suiteName);

@@ -9,6 +9,10 @@ import javax.net.ssl.SSLEngine;
 import org.junit.jupiter.api.BeforeEach;
 
 
+/**
+ * This is a base test class and define setupTlsHandshake method for subclasses. This defines
+ * sslEngine for server and client and also SocketChannel objects to be used by several other tests.
+ */
 public class KernelTLSTestBase {
   protected static final AtomicInteger portNumber = new AtomicInteger(9320);
 
