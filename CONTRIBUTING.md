@@ -15,7 +15,7 @@ Please do not file reports on Github for security issues.  Please
 review the guidelines on at (https://www.linkedin.com/help/linkedin/answer/a1336435).  Reports should be
 encrypted using [PGP key](https://www.linkedin.com/help/linkedin/answer/a1341484) and sent to
 security@linkedin.com preferably with the title "Github
-linkedin/ktls-jni - short summary".
+linkedin/ktls-jni - < short summary >".
 
 Tips for Getting Your Pull Request Accepted
 ===========================================

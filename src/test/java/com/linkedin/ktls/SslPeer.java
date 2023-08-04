@@ -114,7 +114,7 @@ public class SslPeer {
   /**
    * This method is to perform handshake unwrap.
    * @return SSLEngineResult
-   * @throws IOException
+   * @throws IOException thrown in the cases of handshake failure.
    */
   private SSLEngineResult handshakeUnwrap() throws IOException {
     int read = 0;
@@ -163,7 +163,7 @@ public class SslPeer {
   /**
    * This method is used to transfer contents from appReadBuffer to dst byte buffer.
    * @param dst dst byte buffer
-   * @return
+   * @return the number of bytes read
    */
   private int readFromAppBuffer(ByteBuffer dst) {
     appReadBuffer.flip();

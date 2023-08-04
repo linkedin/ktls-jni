@@ -71,10 +71,10 @@ public class TlsParametersV2ExtractorTest extends KernelTLSTestBase {
    * the TLS handshake, generating random plain text of variable size for encryption testing, encrypt the generated
    * plain text using the specified TLS cipher and parameters, attempt to decrypt the encrypted record using the
    * server-side SSL engine and verifying with the original plain text message.
-   * @param tlsProtocolVersion
-   * @param cipherSuite
-   * @param tlsCipher
-   * @throws Exception
+   * @param tlsProtocolVersion ProtocolVersion
+   * @param cipherSuite CipherSuite
+   * @param tlsCipher TlsCipher
+   * @throws Exception thrown as a general exception in cases validation failures.
    */
   void validate_decrypted_record(
       ProtocolVersion tlsProtocolVersion, CipherSuite cipherSuite, TlsCipher tlsCipher) throws Exception {

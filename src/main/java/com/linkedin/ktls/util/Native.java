@@ -79,7 +79,7 @@ public enum Native {
 
   /**
    * This method is used to get the resource name of the shared library
-   * @return
+   * @return String
    */
   private static String resourceName() {
     return "/" + libname + "." + libExtension();

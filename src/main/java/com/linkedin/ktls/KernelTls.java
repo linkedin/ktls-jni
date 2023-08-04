@@ -33,7 +33,7 @@ public class KernelTls {
    *
    * @param engine SSLEngine object used to extract the TLSParameters
    * @param socketChannel SocketChannel object passed to KernelTLSNativeHelper
-   * @throws KTLSEnableFailedException
+   * @throws KTLSEnableFailedException failed to enable ktls
    */
   public void enableKernelTlsForSend(SSLEngine engine, SocketChannel socketChannel) throws KTLSEnableFailedException {
     final TlsParameters tlsParameters = extractor.extract(engine);

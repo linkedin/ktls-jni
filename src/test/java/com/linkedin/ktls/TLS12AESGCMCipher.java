@@ -26,7 +26,6 @@ public class TLS12AESGCMCipher implements TlsCipher {
    * @param plainText The plain text data to be encrypted.
    * @param tlsParameters The TLS parameters required for encryption (key, salt, and record sequence).
    * @return The encrypted data in the form of TLS record format.
-   * @throws Exception
    */
   @Override
   public byte[] encrypt(final byte[] plainText, final TlsParameters tlsParameters) throws Exception {
@@ -57,7 +56,6 @@ public class TLS12AESGCMCipher implements TlsCipher {
    * @param recordText The encrypted data in the form of TLS record format.
    * @param tlsParameters The TLS parameters required for decryption (key, salt, and record sequence).
    * @return The decrypted plain text data.
-   * @throws Exception
    */
   @SuppressWarnings("unused") // Unused for now, but acts as good reference documentation
   public byte[] decrypt(byte[] recordText, TlsParameters tlsParameters) throws Exception {
@@ -100,7 +98,6 @@ public class TLS12AESGCMCipher implements TlsCipher {
    * @param recordSequence The record sequence number.
    * @param plainTextLength The length of the plain text data.
    * @return The AAD as a byte array.
-   * @throws IOException
    */
   private byte[] getAad(byte[] recordSequence, int plainTextLength) throws IOException {
     final ByteArrayDataOutputStream aadStream = new ByteArrayDataOutputStream();
