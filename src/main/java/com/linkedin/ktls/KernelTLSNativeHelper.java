@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 /**
  * This class is a helper including utility methods to interact with the JNI code KernelTLSNativeHelper.cpp.
  * This class involves usage of reflection on JVM internals and therefore is fragile. The functionality of
- * this class has been tested on MSFT JDK 11 and linux kernel versions >= 5.4 and is likely
+ * this class has been tested on MSFT JDK 11 and linux kernel version 5.4.222, 5.15.111 and is likely
  * to break in a future version.
  */
 class KernelTLSNativeHelper {
@@ -37,7 +37,7 @@ class KernelTLSNativeHelper {
    * Extracts the file descriptor associated with the given SocketChannel.
    * Note that this method is using Java reflection to extract the private field file
    * descriptor (fd) associated with a SocketChannel object and therefore is fragile.
-   * It has been tested on MSFT JDK 11 and linux kernel versions >= 5.4.
+   * It has been tested on MSFT JDK 11 and linux kernel version 5.4.222, 5.15.111.
    * This method relies on specific implementation details of the sun.nio.ch.SocketChannelImpl
    * class and the java.io.FileDescriptor class and these details vary in different JAVA versions.
    *

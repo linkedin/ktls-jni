@@ -11,7 +11,7 @@ import javax.net.ssl.SSLEngine;
  * This class is used to extract the TLS Parameters from SSL Engine object based on respective cipher suites,
  * TLS protocol version and other parameters.
  * This class involves usage of reflection on JVM internals and therefore is fragile. The functionality of
- * this class has been tested on MSFT JDK 11 and linux kernel versions >= 5.4 and is likely
+ * this class has been tested on MSFT JDK 11 and linux kernel versions 5.4.222, 5.15.111 and is likely
  * to break in a future version.
  */
 class TlsParametersExtractor {
@@ -25,7 +25,7 @@ class TlsParametersExtractor {
    * This method is used to invoke the respective extractor method based on TLS protocol version supported.
    * Note that this method is using Java reflection to extract the private fields
    * associated with a SSLEngine object and therefore is fragile and might break in future JAVA versions.
-   * It has been tested on MSFT JDK 11 and linux kernel versions >= 5.4.
+   * It has been tested on MSFT JDK 11 and linux kernel versions 5.4.222, 5.15.111.
    *
    * @param sslEngine SSLEngine object
    * @return TlsParameters
@@ -48,7 +48,8 @@ class TlsParametersExtractor {
    * Extractor for AES_GCM cipher suite version after verifying the compatibility of cipher with protocol
    * version after extracting the necessary fields from sslEngine. Note that this method is using Java
    * reflection to extract the private fields associated with a SSLEngine object and therefore is fragile
-   * and might break in future JAVA versions. It has been tested on MSFT JDK 11 and linux kernel versions >=5.4
+   * and might break in future JAVA versions. It has been tested on MSFT JDK 11 and linux kernel versions 5.4.222,
+   * 5.15.111
    *
    * @param sslEngine SSLEngine object
    * @return TlsParameters
@@ -89,7 +90,7 @@ class TlsParametersExtractor {
    * This method is used to invoke the respective extractor method when TLSv1.3 support is present.
    * Note that this method is using Java reflection to extract the private fields associated with a
    * SSLEngine object and therefore is fragile and might break in future JAVA versions. It has been
-   * tested on MSFT JDK 11 and linux kernel versions >= 5.4
+   * tested on MSFT JDK 11 and linux kernel version 5.4.22, 5.15.111
    *
    * @param sslEngine SSLEngine
    * @return TlsParameters
@@ -147,7 +148,7 @@ class TlsParametersExtractor {
    * This method is used to build TLSParameters for AES_GCM cipher suites with salt, iv, key, sequence number with
    * no TLSv1.3 support. Note that this method is using Java reflection to extract the private fields associated with a SSLEngine
    * object and therefore is fragile and might break in future JAVA versions. It has been tested on MSFT JDK 11 and
-   * linux kernel versions >= 5.4
+   * linux kernel version 5.4.222, 5.15.111
    *
    * @param protocolVersion ProtocolVersion
    * @param cipherSuite CipherSuite

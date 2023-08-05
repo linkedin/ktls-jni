@@ -17,8 +17,8 @@ import static org.junit.jupiter.api.Assertions.*;
 
 
 /**
- *  This test class includes validation end-to-end tests to check TlsParameter extraction by encrypt-decrypt testing
- *  of plain text messages based on Tls protocol version and cipher suite version.
+ * This test class includes validation end-to-end tests to check TlsParameter extraction by encrypt-decrypt testing
+ * of plain text messages based on Tls protocol version and cipher suite version.
  */
 public class TlsParametersV2ExtractorTest extends KernelTLSTestBase {
   private static final int MIN_PLAINTEXT_SIZE = 256;

@@ -12,8 +12,10 @@ import javax.net.ssl.SSLEngineResult;
 
 /**
  * This class includes methods for SSL communication and the reference is taken from Apache Kafka's
- * https://github.com/apache/kafka/blob/e0b7499103df9222140cdbf7047494d92913987e/clients/src/main/java/org/apache/kafka/common/network/SslTransportLayer.java#L841
- *
+ * <ul>
+ *    <li>https://github.com/apache/kafka/blob/e0b7499103df9222140cdbf7047494d92913987e/clients/src/main/java/org/apache/kafka/common/network/SslTransportLayer.java#L841</li>
+ * </ul>
+ * TODO: LICENSE information to be added.
  */
 public class SslPeer {
   public static final ByteBuffer EMPTY_BUF = ByteBuffer.wrap(new byte[0]);

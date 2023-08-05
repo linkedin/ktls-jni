@@ -26,7 +26,7 @@ const char* CHACHA20_POLY1305_CIPHER_NAME = "CHACHA20_POLY1305";
 
 /**
  * This method enables Kernel TLS for a specified socket by setting TCP_ULP to tls
- * This method is available only when NO_KTLS flag is not set
+ * This method always returns an error if the NO_KTLS preprocessor flag is not set at build time.
  * @param socketFd file descriptor on which kTLS has to be enabled.
  */
 #ifndef NO_KTLS
@@ -36,7 +36,7 @@ int startKernelTls(jint socketFd) {
 
 /**
  * This method is used to enable TLS for the specified socket using the provided crypto information.
- * This method is available only when NO_KTLS flag is not set
+ * This method always returns an error if the NO_KTLS preprocessor flag is not set at build time.
  *
  * @param socketFd file descriptor of the socket to enable TLS.
  * @param sendingMode boolean indicating whether TLS is being enabled for sending or receiving
@@ -59,7 +59,7 @@ int enableTlsWithCryptoInfo(int socketFd, bool sendingMode, void* crypto_info, u
 
 /**
  * This method is used to copy data from a Java byte array to a C++ unsigned char buffer.
- * This method is available only when NO_KTLS flag is not set
+ * This method always returns an error if the NO_KTLS preprocessor flag is not set at build time.
  *
  * @param env The JNI environment pointer
  * @param src source Java byte array to be copied
@@ -87,7 +87,7 @@ int copyArray(JNIEnv *env, jbyteArray &src, unsigned char *dest, size_t destSize
 
 /**
  * This method is used to enable Kernel TLS for sending data using AES 128 GCM cipher.
- * This method is available only when NO_KTLS flag is not set
+ * This method always returns an error if the NO_KTLS preprocessor flag is not set at build time.
  *
  * @param env The JNI environment pointer.
  * @param self reference to the Java KernelTLSNativeHelper object
@@ -120,7 +120,7 @@ JNIEXPORT jint JNICALL Java_com_linkedin_ktls_KernelTLSNativeHelper_enableKernel
 
 /**
  * This method is used to enable Kernel TLS for sending data using AES 256 GCM cipher.
- * This method is available only when NO_KTLS flag is not set
+ * This method always returns an error if the NO_KTLS preprocessor flag is not set at build time.
  *
  * @param env The JNI environment pointer.
  * @param self reference to the Java KernelTLSNativeHelper object
@@ -153,7 +153,7 @@ JNIEXPORT jint JNICALL Java_com_linkedin_ktls_KernelTLSNativeHelper_enableKernel
 
 /**
  * This method is used to enable Kernel TLS for sending data using CHACHA20_POLY1305 cipher.
- * This method is available only when NO_KTLS flag is not set
+ * This method always returns an error if the NO_KTLS preprocessor flag is not set at build time.
  *
  * @param env The JNI environment pointer.
  * @param self reference to the Java KernelTLSNativeHelper object
@@ -186,7 +186,7 @@ JNIEXPORT jint JNICALL Java_com_linkedin_ktls_KernelTLSNativeHelper_enableKernel
 
 /**
  * This method is a JNI method used to retrieve the list of supported symmetric ciphers for the native code.
- * This method is available only when NO_KTLS flag is not set
+ * This method always returns an error if the NO_KTLS preprocessor flag is not set at build time.
  *
  * @param env The JNI environment pointer.
  * @param reference to the Java KernelTLSNativeHelper object
@@ -218,7 +218,7 @@ JNIEXPORT jobjectArray JNICALL Java_com_linkedin_ktls_KernelTLSNativeHelper_getS
 
 /**
  * This method is a JNI method to send a control message over the TLS-enabled socket.
- * This method is available only when NO_KTLS flag is not set
+ * This method always returns an error if the NO_KTLS preprocessor flag is not set at build time.
  *
  * @param env The JNI environment pointer
  * @param self reference to the Java KernelTLSNativeHelper object
