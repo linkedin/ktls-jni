@@ -8,3 +8,7 @@ See LICENSE in the project root for license information.
 This product includes/uses modified source code from zstd-jni (https://github.com/luben/zstd-jni)
 Copyright (c) 2015-2023
 License: BSD
+
+This product includes/uses modified source code from Apache Kafka (https://github.com/apache/kafka)
+Copyright (c) 2017 The Apache Software Foundation
+License: Apache 2.0
