@@ -12,3 +12,6 @@ License: BSD
 This product includes/uses modified source code from Apache Kafka (https://github.com/apache/kafka)
 Copyright (c) 2017 The Apache Software Foundation
 License: Apache 2.0
+
+This product includes/uses modified code(KernelTLSNativeHelper.cpp) from the Linux kernel documentation
+at (https://docs.kernel.org/networking/tls.html)
