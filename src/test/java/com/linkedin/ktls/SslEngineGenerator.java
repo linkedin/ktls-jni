@@ -25,6 +25,12 @@ import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
 
 
+/**
+ * This class includes constructor and setter, getter for forming the SSLEngine object.
+ * SSLEngine in Java is a class that provides a high-level API for performing SSL/TLS operations,
+ * including encryption, decryption, and secure data transmission, over TCP-based connections.
+ * This also has utility methods to initialise truststores , keystores by performing signing.
+ */
 public class SslEngineGenerator {
   private static final String KEY_ALIAS = "main";
   private static final String CERT_ALIAS = "main";

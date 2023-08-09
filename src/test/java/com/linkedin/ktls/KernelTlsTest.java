@@ -18,6 +18,10 @@ import static com.linkedin.ktls.CipherSuite.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 
+/**
+ * This class contains integration tests checking the compatibility of enabling kernel TLS
+ * by checking the OS and kernel version by altering parameters such as cipher name and TLS version.
+ */
 public class KernelTlsTest extends KernelTLSTestBase {
   private static final KernelVersion MIN_SUPPORTED_KERNEL_VERSION = new KernelVersion("4.17");
   private static final KernelVersion MIN_SUPPORTED_KERNEL_VERSION_FOR_CHACHA20_POLY1305 = new KernelVersion("5.11");

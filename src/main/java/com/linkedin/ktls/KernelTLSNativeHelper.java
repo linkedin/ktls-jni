@@ -11,6 +11,12 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 
+/**
+ * This class is a helper including utility methods to interact with the JNI code KernelTLSNativeHelper.cpp.
+ * This class involves usage of reflection on JVM internals and therefore is fragile. The functionality of
+ * this class has been tested on MSFT JDK 11 and linux kernel version 5.4.222, 5.15.111 and is likely
+ * to break in a future version.
+ */
 class KernelTLSNativeHelper {
   private static final int UNSUPPORTED_OPERATING_SYSTEM = 6001;
   private static final int UNSUPPORTED_CIPHER = 6002;
@@ -29,6 +35,11 @@ class KernelTLSNativeHelper {
 
   /**
    * Extracts the file descriptor associated with the given SocketChannel.
+   * Note that this method is using Java reflection to extract the private field file
+   * descriptor (fd) associated with a SocketChannel object and therefore is fragile.
+   * It has been tested on MSFT JDK 11 and linux kernel version 5.4.222, 5.15.111.
+   * This method relies on specific implementation details of the sun.nio.ch.SocketChannelImpl
+   * class and the java.io.FileDescriptor class and these details vary in different JAVA versions.
    *
    * @param socketChannel The SocketChannel from which to extract the file descriptor.
    * @return The integer file descriptor associated with the SocketChannel.
@@ -36,23 +47,21 @@ class KernelTLSNativeHelper {
    */
   int extractFd(SocketChannel socketChannel) {
     try {
-      // Retrieve the 'fd' field from the 'sun.nio.ch.SocketChannelImpl' class using ReflectionUtils.
       final Object fileDescriptor =
           ReflectionUtils.getValueAtField("sun.nio.ch.SocketChannelImpl", "fd", socketChannel);
-      // Convert the result to an integer and return it as the file descriptor.
       return (int) ReflectionUtils.getValueAtField("java.io.FileDescriptor", "fd", fileDescriptor);
     } catch (Exception e) {
-      // If there is any exception while extracting the file descriptor, wrap it in an IllegalArgumentException
-      // and rethrow it to signal an error.
       throw new IllegalArgumentException(e);
     }
   }
 
   /**
-   * This function tries to enable kernelTLS for send based on the symmetric cipher value.
+   * This function tries to enable kernelTLS for send based on the symmetric cipher value. The supported
+   * symmetric ciphers are AES_GCM_128, AES_GCM_256 and CHACHA20_POLY1305.
+   *
    * @param socketChannel SocketChannel object to enable kernelTLS on
    * @param tlsParameters TlsParameters with the symmetric cipher based on which we decide if kernel TLS can be enabled.
-   * @throws KTLSEnableFailedException
+   * @throws KTLSEnableFailedException failed to enable ktls
    */
   void enableKernelTlsForSend(SocketChannel socketChannel, TlsParameters tlsParameters)
       throws KTLSEnableFailedException {
@@ -87,9 +96,10 @@ class KernelTLSNativeHelper {
   /**
    * This function is to throw the respective exception based on the return value from the underlying JNI kernel TLS enable call.
    * Also used OS version and symmetric cipher version for logging the exceptions.
+   *
    * @param retCode Return value after performing kernel TLS enabled send
    * @param symmetricCipher Symmetric cipher used for logging in the exceptions.
-   * @return
+   * @return KTLSEnableFailedException
    */
   private KTLSEnableFailedException buildExceptionForReturnCode(int retCode, SymmetricCipher symmetricCipher) {
     String osVersion = System.getProperty("os.version");
@@ -133,6 +143,7 @@ class KernelTLSNativeHelper {
 
   /**
    * This method is used to populate the supported symmetric ciphers using an ciphers array returned from NativeHelper.cpp.
+   *
    * @return List<String> containing the cipher suites list.
    */
   public List<String> getSupportedCipherSuites() {
@@ -147,8 +158,9 @@ class KernelTLSNativeHelper {
 
   /**
    * This method is used to extract the file descriptor and send a close alert to the file descriptor.
+   *
    * @param socketChannel SocketChannel object that is to be closed
-   * @throws IOException
+   * @throws IOException thrown in the cases of failure in close notify of alert.
    */
   public void sendCloseNotify(SocketChannel socketChannel) throws IOException {
     final int socketFd = extractFd(socketChannel);

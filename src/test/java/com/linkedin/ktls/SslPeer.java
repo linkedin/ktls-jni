@@ -10,6 +10,26 @@ import javax.net.ssl.SSLEngine;
 import javax.net.ssl.SSLEngineResult;
 
 
+/**
+ * This class includes methods for SSL communication and the reference is taken from Apache Kafka's
+ * <ul>
+ *    <li>https://github.com/apache/kafka/blob/e0b7499103df9222140cdbf7047494d92913987e/clients/src/main/java/org/apache/kafka/common/network/SslTransportLayer.java#L841</li>
+ * </ul>
+ * Licensed to the Apache Software Foundation (ASF) under one or more
+ * contributor license agreements. See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * The ASF licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License. You may obtain a copy of the License at
+ *
+ *   http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 public class SslPeer {
   public static final ByteBuffer EMPTY_BUF = ByteBuffer.wrap(new byte[0]);
 
@@ -57,6 +77,12 @@ public class SslPeer {
     appReadBuffer.clear();
   }
 
+  /**
+   * Performs the WRAP function
+   *
+   * @return SSLEngineResult
+   * @throws IOException
+   */
   private SSLEngineResult handshakeWrap() throws IOException {
     if (netWriteBuffer.hasRemaining())
       throw new IllegalStateException("handshakeWrap called with netWriteBuffer not empty");
@@ -76,6 +102,14 @@ public class SslPeer {
     return result;
   }
 
+  /**
+   * Flushes the buffer to the network, non blocking.
+   * Visible for testing.
+   *
+   * @param buf ByteBuffer
+   * @return boolean true if the buffer has been emptied out, false otherwise
+   * @throws IOException
+   */
   private boolean flush(ByteBuffer buf) throws IOException {
     int remaining = buf.remaining();
     if (remaining > 0) {
@@ -85,10 +119,22 @@ public class SslPeer {
     return true;
   }
 
+  /**
+   * This method is to read from socket channel to netReadBuffer.
+   *
+   * @return number of bytes read
+   * @throws IOException
+   */
   private int readFromChannel() throws IOException {
     return channel.read(netReadBuffer);
   }
 
+  /**
+   * This method is to perform handshake unwrap.
+   *
+   * @return SSLEngineResult
+   * @throws IOException thrown in the cases of handshake failure.
+   */
   private SSLEngineResult handshakeUnwrap() throws IOException {
     int read = 0;
     if (result!= null && result.getStatus() == SSLEngineResult.Status.BUFFER_UNDERFLOW) {
@@ -118,6 +164,11 @@ public class SslPeer {
     return result;
   }
 
+  /**
+   * This method is to run SSLEngine tasks needed.
+   *
+   * @return HandshakeStatus
+   */
   private SSLEngineResult.HandshakeStatus runDelegatedTasks() {
     for (;;) {
       Runnable task = sslEngine.getDelegatedTask();
@@ -129,6 +180,12 @@ public class SslPeer {
     return sslEngine.getHandshakeStatus();
   }
 
+  /**
+   * This method is used to transfer contents from appReadBuffer to dst byte buffer.
+   *
+   * @param dst dst byte buffer
+   * @return the number of bytes read
+   */
   private int readFromAppBuffer(ByteBuffer dst) {
     appReadBuffer.flip();
     int remaining = Math.min(appReadBuffer.remaining(), dst.remaining());
@@ -142,6 +199,15 @@ public class SslPeer {
     return remaining;
   }
 
+  /**
+   * Reads a sequence of bytes from this channel into the given buffer. Reads as much as possible
+   * until there is no more data in the socket.
+   *
+   * @param dst The buffer into which bytes are to be transferred
+   * @return The number of bytes read, possible zero or -1 if the channel has reached end-of-stream
+   *         and no more data is available
+   * @throws IOException if some other I/O error occurs
+   */
   public int read(ByteBuffer dst) throws IOException {
     //if we have unread decrypted data in appReadBuffer read that into dst buffer.
     int read = 0;
@@ -170,6 +236,13 @@ public class SslPeer {
     return read;
   }
 
+  /**
+   * Writes a sequence of bytes to this channel from the given buffer.
+   *
+   * @param src The buffer from which bytes are to be retrieved
+   * @return The number of bytes read from src, possibly zero, or -1 if the channel has reached end-of-stream
+   * @throws IOException If some other I/O error occurs
+   */
   public int write(ByteBuffer src) throws IOException {
     int written = 0;
     while (flush(netWriteBuffer) && src.hasRemaining()) {

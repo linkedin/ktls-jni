@@ -1,5 +1,8 @@
 package com.linkedin.ktls;
 
+/**
+ * This is a POJO class for constructing the TlsParameters object using respective fields.
+ */
 class TlsParameters {
   final ProtocolVersion protocolVersion;
   final SymmetricCipher symmetricCipher;

@@ -1,3 +1,11 @@
+# ktls-jni
+
+A plugin for enabling kernel TLS on Java systems
+
+## Author/Contributor
+
+maintained by [LinkedIn](https://github.com/linkedin)
+
 # About the project
 This library provides a way for Java-based applications to take advantage of in-kernel TLS encryption and decryption available in modern Linux kernels.
 The project is structured as a JNI library and the corresponding C++ class that makes appropriate system calls to enable in-kernel TLS on a socket.

@@ -10,13 +10,23 @@ import org.bouncycastle.crypto.params.KeyParameter;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-
+/**
+ * This class implements the TlsCipher interface and provides methods to encrypt and decrypt
+ * data using AES-GCM encryption with TLSv1.2
+ */
 public class TLS12AESGCMCipher implements TlsCipher {
   private static final byte[] APP_DATA_CONTENT_TYPE = new byte[]{23};
   private static final byte[] TLS_1_2_VERSION = new byte[]{3, 3};
   private static final int MAC_BYTES = 16;
   private static final int SEQ_NUM_BYTES = 8;
 
+  /**
+   * This method encrypts the plain text using AES-GCM with TLS 1.2 parameters.
+   *
+   * @param plainText The plain text data to be encrypted.
+   * @param tlsParameters The TLS parameters required for encryption (key, salt, and record sequence).
+   * @return The encrypted data in the form of TLS record format.
+   */
   @Override
   public byte[] encrypt(final byte[] plainText, final TlsParameters tlsParameters) throws Exception {
     final byte[] nonce = getNonce(tlsParameters);
@@ -40,6 +50,13 @@ public class TLS12AESGCMCipher implements TlsCipher {
     return recordStream.toByteArray();
   }
 
+  /**
+   * This method decrypts the TLS record data using AES-GCM with TLS 1.2 parameters.
+   *
+   * @param recordText The encrypted data in the form of TLS record format.
+   * @param tlsParameters The TLS parameters required for decryption (key, salt, and record sequence).
+   * @return The decrypted plain text data.
+   */
   @SuppressWarnings("unused") // Unused for now, but acts as good reference documentation
   public byte[] decrypt(byte[] recordText, TlsParameters tlsParameters) throws Exception {
     final ByteBuffer recordBuffer = ByteBuffer.allocate(recordText.length);
@@ -75,6 +92,13 @@ public class TLS12AESGCMCipher implements TlsCipher {
     return plainText;
   }
 
+  /**
+   * This method generates the Additional Authentication Data (AAD) used in encryption/decryption.
+   *
+   * @param recordSequence The record sequence number.
+   * @param plainTextLength The length of the plain text data.
+   * @return The AAD as a byte array.
+   */
   private byte[] getAad(byte[] recordSequence, int plainTextLength) throws IOException {
     final ByteArrayDataOutputStream aadStream = new ByteArrayDataOutputStream();
     aadStream.write(recordSequence);
@@ -84,6 +108,12 @@ public class TLS12AESGCMCipher implements TlsCipher {
     return aadStream.toByteArray();
   }
 
+  /**
+   * This method generates the nonce for AES-GCM encryption or decryption by combining the TLS salt and record sequence.
+   *
+   * @param tlsParameters The TLS parameters containing the salt and record sequence.
+   * @return The nonce as a byte array.
+   */
   private byte[] getNonce(TlsParameters tlsParameters) {
     final int saltLength = tlsParameters.salt.length;
     final int recSeqLength = tlsParameters.rec_seq.length;

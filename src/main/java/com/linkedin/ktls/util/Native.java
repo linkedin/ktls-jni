@@ -50,6 +50,7 @@ public enum Native {
 
   /**
    * This method is used to get the name of the operating system
+   *
    * @return String containing osName
    */
   private static String osName() {
@@ -65,6 +66,7 @@ public enum Native {
 
   /**
    * This method is used to get the library extension based on the operating system.
+   *
    * @return String containing library extension
    */
   private static String libExtension() {
@@ -79,7 +81,8 @@ public enum Native {
 
   /**
    * This method is used to get the resource name of the shared library
-   * @return
+   *
+   * @return String
    */
   private static String resourceName() {
     return "/" + libname + "." + libExtension();
@@ -97,6 +100,7 @@ public enum Native {
 
   /**
    * This method is used to load the native library with an optional temporary folder
+   *
    * @param tempFolder File to store optional temp folder if any.
    */
   public static synchronized void load(final File tempFolder) {
